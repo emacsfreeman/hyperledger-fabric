@@ -1,7 +1,8 @@
+// docs: https://hyperledger-fabric.readthedocs.io/en/release-1.4/chaincode4ade.html
 package main
 
 import (
-       "fmt'
+       "fmt"
 
        "github.com/hyperledger/fabric/core/chaincode/shim"
        "github.com/hyperledger/fabric/protos/peer"
