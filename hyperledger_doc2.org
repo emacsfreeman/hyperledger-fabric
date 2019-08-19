@@ -1,0 +1,173 @@
+#+TITLE: Qu'y a-t-il de nouveau dans la v1.4
+#+AUTHOR: Laurent Garnier
+
+* Première version de support à long terme de Hyperledger Fabric
+
+  Hyperledger Fabric a mûri depuis la première version v1.0, de même
+  que la communauté des opérateurs Fabric. Les développeurs de Fabric
+  ont travaillé avec les opérateurs de réseau pour produire la v1.4 en
+  mettant l’accent sur la stabilité et les opérations de
+  production. En tant que tel, v1.4.x sera notre première version de
+  support technique à long terme.
+
+  À ce jour, notre politique consiste à fournir des correctifs
+  (correctifs) pour notre dernière version majeure ou mineure jusqu'à
+  la publication de la prochaine version majeure ou mineure. Nous
+  prévoyons de poursuivre cette politique pour les versions
+  ultérieures. Toutefois, pour Hyperledger Fabric v1.4, les
+  responsables de Fabric s’engagent à fournir des corrections de bugs
+  pour une période d’un an à compter de la date de publication. Cela
+  entraînera probablement une série de versions de correctifs (v1.4.1,
+  v1.4.2, etc.), dans lesquelles plusieurs correctifs sont regroupés
+  dans une version de correctif.
+
+  Si vous utilisez Hyperledger Fabric v1.4.x, vous pouvez être assuré
+  que vous pourrez mettre à niveau en toute sécurité les versions de
+  correctifs suivantes. Si un processus de mise à niveau est
+  nécessaire pour remédier à un défaut, nous fournirons ce processus
+  lors de la publication du correctif.
+
+* Service de commande Raft
+
+  Introduit dans la v1.4.1, [[https://hyperledger-fabric.readthedocs.io/en/release-1.4/whatis.html#pluggable-consensus][Raft]] est un service de commande CFT
+  (tolérance aux pannes en cas de collision) basé sur une
+  implémentation du protocole Raft dans [[https://etcd.io/][etcd]]. Radeau suit un modèle de
+  «leader et suiveur», dans lequel un nœud de leader est élu (par
+  canal) et ses décisions sont répliquées pour les suiveurs. Les
+  services de commande par radeau devraient être plus faciles à
+  configurer et à gérer que les services de commande basés à Kafka, et
+  leur conception permet aux organisations réparties dans le monde
+  entier de contribuer aux nœuds d'un service de commande
+  décentralisé.
+
+  + [[https://hyperledger-fabric.readthedocs.io/en/release-1.4/orderer/ordering_service.html][Le service de commande]] : décrit le rôle d'un service de commande
+    dans Fabric et donne un aperçu des trois implémentations de
+    service de commande actuellement disponibles: Solo, Kafka et Raft.
+  + [[https://hyperledger-fabric.readthedocs.io/en/release-1.4/raft_configuration.html][Configuration et utilisation d'un service de commande Raft]] :
+    affiche les paramètres de configuration et les considérations à
+    prendre en compte lors du déploiement d'un service de commande
+    Raft.
+  + [[https://hyperledger-fabric.readthedocs.io/en/release-1.4/orderer_deploy.html][Configuration d'un noeud de commande]] : Décrit le processus de
+    déploiement d'un noeud de commande, indépendamment de la mise en
+    œuvre du service de commande.
+  + [[https://hyperledger-fabric.readthedocs.io/en/release-1.4/build_network.html][Construire votre premier réseau]] : La possibilité de créer un réseau
+    exemple en utilisant un service de commande Raft a été ajoutée à
+    ce tutoriel.
+  + [[https://hyperledger-fabric.readthedocs.io/en/release-1.4/kafka_raft_migration.html][Migration de Kafka vers Raft]] : Si vous êtes un utilisateur
+    disposant d’un service de commande Kafka, ce document décrit le
+    processus de migration vers un service de commande
+    Raft. Disponible depuis v1.4.2.
+
+* Facilité d'entretien et améliorations des opérations
+
+  Alors que de plus en plus de réseaux Hyperledger Fabric entrent dans
+  un état de production, la maintenance et les aspects opérationnels
+  sont essentiels. Fabric v1.4 fait un grand pas en avant avec des
+  améliorations de la journalisation, des contrôles de l'état et des
+  mesures opérationnelles. En tant que tel, Fabric v1.4 est la version
+  recommandée pour les opérations de production.
+
+  [[https://hyperledger-fabric.readthedocs.io/en/release-1.4/operations_service.html][Le service d'opérations]] : le nouveau service d'opérations RESTful
+  fournit aux opérateurs trois services pour surveiller et gérer les
+  opérations des noeuds homologues et des noeuds de commande :
+
+  + Le point de terminaison logging =/logspec= permet aux opérateurs
+    d’obtenir et de définir de manière dynamique les niveaux de
+    journalisation pour les noeuds homologues et les nœuds de
+    commande.
+  + Le noeud final =/healthz= permet aux opérateurs et aux services
+    d’orchestration de conteneur de vérifier l’activité et la vie des
+    noeuds homologues et des noeuds de commande.
+  + Le point de terminaison =/metrics= permet aux opérateurs
+    d’utiliser Prometheus pour extraire des métriques opérationnelles
+    des nœuds homologues et des nœuds de commande. Les métriques
+    peuvent également être poussées vers StatsD.
+
+* Modèle de programmation amélioré pour développer des applications
+
+  L'écriture d'applications décentralisées est maintenant plus
+  facile. Les améliorations apportées aux modèles de programmation
+  dans les chaincodes Node.js SDK et Node.js rendent le développement
+  d'applications décentralisées plus intuitif, vous permettant ainsi
+  de vous concentrer sur la logique de votre application. Les packages
+  npm existants sont toujours disponibles, tandis que les nouveaux
+  packages npm fournissent une couche d’abstraction permettant
+  d’améliorer la productivité et la facilité d’utilisation des
+  développeurs.
+
+  La nouvelle documentation vous aide à comprendre les différents
+  aspects de la création d’une application décentralisée pour
+  Hyperledger Fabric, à l’aide d’un scénario de réseau commercial.
+
+  + [[https://hyperledger-fabric.readthedocs.io/en/release-1.4/developapps/scenario.html][Le scénario]] : décrit un réseau d’entreprise hypothétique impliquant
+    six organisations souhaitant créer une application à traiter
+    ensemble, qui servira de cas d’utilisation pour décrire le modèle
+    de programmation.
+  + [[https://hyperledger-fabric.readthedocs.io/en/release-1.4/developapps/analysis.html][Analyse]] : Décrit la structure d'un papier commercial et comment
+    les transactions l'affectent avec le temps. Démontre que la
+    modélisation à l'aide d'états et de transactions fournit un moyen
+    précis de comprendre et de modéliser le processus métier
+    décentralisé.
+  + [[https://hyperledger-fabric.readthedocs.io/en/release-1.4/developapps/architecture.html][Processus et conception de données]] : indique comment concevoir les
+    processus de papier commercial et leurs structures de données
+    associées.
+  + [[https://hyperledger-fabric.readthedocs.io/en/release-1.4/developapps/smartcontract.html][Traitement intelligent des contrats]] : montre comment un contrat
+    intelligent régissant le processus commercial décentralisé
+    d'émission, d'achat et de remboursement de papier commercial
+    devrait être conçu.
+  + [[https://hyperledger-fabric.readthedocs.io/en/release-1.4/developapps/application.html][Application]] décrit de manière conceptuelle une application client
+    qui exploiterait le contrat intelligent décrit dans Traitement de
+    contrat intelligent.
+  + [[https://hyperledger-fabric.readthedocs.io/en/release-1.4/developapps/designelements.html][Éléments de conception d'application]] : Décrit les détails relatifs
+    aux espaces de nom de contrat, au contexte de transaction, aux
+    gestionnaires de transaction, aux profils de connexion, aux
+    options de connexion, aux portefeuilles et aux passerelles.
+
+  Et enfin, un tutoriel et un exemple qui donne vie au scénario de
+  papier commercial :
+
+  [[https://hyperledger-fabric.readthedocs.io/en/release-1.4/tutorial/commercial_paper.html][Tutoriel commercial]]
+  
+* Nouveaux tutoriels
+
+  + [[https://hyperledger-fabric.readthedocs.io/en/release-1.4/write_first_app.html][Écriture de votre première application]] : ce didacticiel a été mis à
+    jour pour tirer parti du modèle de programmation amélioré du SDK
+    Node.js et des chaincodes. Le didacticiel contient des exemples
+    JavaScript et Typescript de l’application client et du code
+    chaîne.
+  + [[https://hyperledger-fabric.readthedocs.io/en/release-1.4/tutorial/commercial_paper.html][Didacticiel sur le papier commercial]] Comme mentionné ci-dessus, il
+    s'agit du didacticiel qui accompagne la nouvelle documentation
+    Développement d'applications.
+  + [[https://hyperledger-fabric.readthedocs.io/en/release-1.4/upgrade_to_newest_version.html][Mise à niveau vers la version la plus récente de Fabric]] : exploite
+    le réseau de [[https://hyperledger-fabric.readthedocs.io/en/release-1.4/build_network.html][Building Your First Network]] pour démontrer une mise à
+    niveau de v1.3 vers v1.4.x. Inclut à la fois un script (qui peut
+    servir de modèle pour les mises à niveau), ainsi que les commandes
+    individuelles vous permettant de comprendre chaque étape d'une
+    mise à niveau.
+
+* Améliorations des données privées
+
+  [[https://hyperledger-fabric.readthedocs.io/en/release-1.4/private-data-arch.html][Données privées]] : la fonctionnalité Données privées fait partie de
+  Fabric depuis la version 1.2. Cette version présente deux nouvelles
+  améliorations :
+
+  + La réconciliation, qui permet aux entreprises ajoutées aux
+    collections de données privées d'extraire les données privées de
+    transactions antérieures auxquelles elles ont maintenant droit.
+  + Contrôle d'accès client pour appliquer automatiquement le contrôle
+    d'accès dans les codes de chaîne en fonction de l'appartenance à
+    la collection de l'organisation client sans avoir à écrire de
+    logique de chaîne.
+
+* Notes de version
+
+  Les notes de version fournissent plus de détails aux utilisateurs
+  qui migrent vers la nouvelle version, ainsi qu'un lien vers le
+  journal des modifications de la version complète.
+
+  + [[https://github.com/hyperledger/fabric/releases/tag/v1.4.0][Notes de publication de Fabric v1.4.0.]]
+  + [[https://github.com/hyperledger/fabric/releases/tag/v1.4.1][Notes de publication de Fabric v1.4.1.]]
+  + [[https://github.com/hyperledger/fabric/releases/tag/v1.4.2][Notes de publication de Fabric v1.4.2.]]
+  + [[https://github.com/hyperledger/fabric-ca/releases/tag/v1.4.0][Notes de publication de Fabric CA v1.4.0.]]
+  + [[https://github.com/hyperledger/fabric-ca/releases/tag/v1.4.1][Notes de publication de Fabric CA v1.4.1.]]
+  + [[https://github.com/hyperledger/fabric-ca/releases/tag/v1.4.2][Notes de publication de Fabric CA v1.4.2.]]

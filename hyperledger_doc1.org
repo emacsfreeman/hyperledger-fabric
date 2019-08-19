@@ -1,0 +1,440 @@
+#+TITLE: Hyperledger Fabric Introduction
+#+AUTHOR: Laurent Garnier
+
+* Introduction
+
+  En termes général, une blockchain est un registre de transaction
+  immuable, maintenu avec un réseau distribué de /noeuds
+  pairs/. Chacun de ses noeuds maintient une copie du registre en
+  appliquant des transactions qui ont été validées par un /protocole
+  de consensus/, groupé en blocs qui incluent un hash qui lie chaque
+  bloc au précédent.
+
+  La première application et la plus largement reconnue d'une
+  blockchain est la crypto-monnaie [[https://en.wikipedia.org/wiki/Bitcoin][Bitcoin]], bien que d'autres ont
+  suivi ses pas. Ethereum, une crypto-monnaie alternative, a choisi une
+  approche différente, intégrant de nombreuses caractéristiques
+  similaires à Bitcoin mais ajoutant les /contrats intelligents/
+  (smart contracts) pour créer une platforme distribuée
+  d'applications. Bitcoin et Ethereum tombent dans une classe de
+  blockchain qui seraient classées comme technologie /blockchain
+  publique/. En gros, ce sont des réseaux publics, ouverts à tous, où
+  les participants interagissent anonymement.
+
+  À mesure que la popularité de Bitcoin, Ethereum et de quelques
+  autres technologies dérivées a crû, l'intérêt pour appliquer la
+  technologie sous-jacente de la blockchain, des registres distribués
+  et des plateformes d'applications distribuées pour des cas d'usage
+  industriels plus innovant a aussi crû. Cependant, de nombreux cas
+  d'usage industriels requièrent des caractéristiques de performance
+  que les technologies de blockchains publiques ne sont pas capables
+  (actuellement) de fournir. De plus, dans de nombreux cas d'usage,
+  l'identité des participants est hautement requise, tel que dans le
+  cas des transactions financières où les régulations
+  Know-Your-Customer (KYC connaissez votre client) et Anti-Money
+  Laundering (AML anti-blanchiment d'argent) doivent être suivies. 
+
+  Pour un cas d'usage industriel, nous devons considérer les exigences
+  suivantes : 
+
+  + Les participants doivent être identifiés/identifiables
+  + Les réseaux doivent être privés
+  + Performances de traitement élevées
+  + Faible latence de la confirmation de transaction
+  + Intimité et confidentialité des transactions et des données
+    relatives aux transactions commerciales
+
+
+  Alors que de nombreuses premières plateformes blockchain sont
+  /en cours d'adaption/ pour les cas industriels, Hyperledger Fabric
+  a été /conçu/ pour les cas industriels depuis le début. Les sections
+  suivantes décrivent comment Hyperledger Fabric (Fabric) se
+  différentie des autres plateformes blockcahin et décrit quelques
+  motivations pour son architecture de décisions.
+
+* Hyperledger Fabric
+
+  Hyperledger Fabric est une plate-forme DLT (Open-Leded Distributed
+  Ledger Technology) open source de niveau entreprise, conçue pour
+  être utilisée dans des contextes d'entreprise. Elle offre des
+  fonctionnalités de différenciation essentielles par rapport aux
+  autres plates-formes populaires de registre distribué ou de
+  blockchains.
+
+  Un point clé de différenciation est le fait que Hyperledger a été
+  créé sous la Linux Foundation, qui a elle-même une longue et
+  fructueuse expérience de projets open source sous une gouvernance
+  ouverte qui développent des communautés durables et des écosystèmes
+  florissants. Hyperledger est régi par un comité de pilotage
+  technique divers et le projet Hyperledger Fabric par un ensemble
+  divers de responsables de maintenance appartenant à plusieurs
+  organisations. Sa communauté de développeurs compte désormais plus
+  de 35 organisations et près de 200 développeurs depuis son
+  lancement.
+
+  Fabric possède une architecture hautement modulaire et configurable,
+  permettant l'innovation, la polyvalence et l'optimisation pour un
+  large éventail de cas d'utilisation de l'industrie, notamment la
+  banque, la finance, les assurances, la santé, les ressources
+  humaines, la chaîne logistique et même la diffusion de musique
+  numérique.
+
+  Fabric est la première plate-forme de registre distribué à prendre
+  en charge les contrats intelligents créés dans des langages de
+  programmation généraux tels que Java, Go et Node.js, plutôt que
+  les langages spécifiques à un domaine (DSL domain-specific
+  languages) contraint. Cela signifie que la plupart des entreprises
+  possèdent déjà les compétences nécessaires pour développer des
+  contrats intelligents et aucune formation supplémentaire pour
+  apprendre une nouvelle langue ou DSL n'est nécessaire.
+
+  La plate-forme Fabric est également autorisée, ce qui signifie que,
+  contrairement à un réseau public sans autorisation, les participants
+  sont connus les uns des autres, plutôt qu'anonymes et donc
+  totalement non fiables. Cela signifie que, même si les participants
+  ne peuvent pas se faire pleinement confiance (ils peuvent par
+  exemple être des concurrents dans le même secteur), un réseau peut
+  être exploité selon un modèle de gouvernance fondé sur la confiance
+  existant entre les participants, telle que un accord juridique ou un
+  cadre pour le traitement des litiges.
+
+  L’un des plus importants différenciateurs de la plate-forme est sa
+  prise en charge des protocoles de consensus enfichables qui
+  permettent à la plate-forme d’être plus efficacement personnalisée
+  pour s’adapter à des cas d’utilisation et à des modèles de confiance
+  particuliers. Par exemple, lorsqu'il est déployé au sein d'une seule
+  entreprise ou exploité par une autorité de confiance, un consensus
+  totalement byzantin tolérant aux pannes peut être considéré comme
+  non nécessaire et comme un frein excessif aux performances et au
+  débit. Dans de telles situations, un protocole de consensus de
+  [[https://fr.wikipedia.org/wiki/Tol%25C3%25A9rance_aux_pannes][tolérance de panne]] (CFT) en cas de panne pourrait être plus que
+  suffisant, alors que, dans un cas d'utilisation décentralisé
+  multipartite, un protocole de consensus plus tolérant de défaillance
+  [[https://en.wikipedia.org/wiki/Byzantine_fault][byzantine]] (BFT) plus traditionnel pourrait être requis.
+
+  Fabric peut tirer parti des protocoles de consensus ne nécessitant
+  pas de crypto-monnaie native pour inciter les activités
+  d’exploitation coûteuses ou pour favoriser l’exécution intelligente
+  des contrats. L'évitement d'une crypto-monnaie réduit certains
+  vecteurs de risque / d'attaque significatifs, et l'absence
+  d'opérations d'extraction cryptographique signifie que la
+  plate-forme peut être déployée avec à peu près le même coût
+  opérationnel que tout autre système distribué.
+
+  La combinaison de ces caractéristiques de conception différenciantes
+  fait de Fabric l'une des plates-formes les plus performantes
+  disponibles à la fois en termes de traitement des transactions et de
+  latence de confirmation des transactions. Elle permet également
+  l'intimité et la confidentialité des transactions et des contrats
+  intelligents (ce que Fabric appelle «code à chaîne») qui les
+  implémentent.
+
+  Explorons ces fonctionnalités de différentiation plus en détails.
+
+* Modularité
+
+  Hyperledger Fabric a été spécialement conçu pour avoir une
+  architecture modulaire. Qu'il s'agisse de protocoles de gestion
+  d'identités connectables, tels que LDAP ou OpenID Connect, de
+  protocoles de gestion de clés ou de bibliothèques cryptographiques,
+  la plate-forme a été conçue pour être configurée de manière à
+  répondre à la diversité des besoins d'utilisation de l'entreprise.
+
+  À un niveau élevé, Fabric est composé des composants modulaires
+  suivants :
+
+  + Un /service de commande/ enfichable établit un consensus sur l'ordre
+    des transactions, puis diffuse des blocs à des pairs.
+  + Un fournisseur de services d’appartenance enfichable est chargé
+    d’associer des entités cryptées au réseau.
+  + Un service de potins d'égal à égal facultatif diffuse la sortie
+    des blocs en commandant le service à d'autres pairs.
+  + Les contrats intelligents («code de chaîne») s'exécutent dans un
+    environnement conteneur (par exemple, Docker) pour
+    l'isolation. Ils peuvent être écrits dans des langages de 
+    programmation standard mais n’ont pas d’accès direct à l’état du
+    registre.
+  + Le registre peut être configuré pour prendre en charge divers
+    SGBD.
+  + Application enfichable d'une stratégie d'endossement et de
+    validation pouvant être configurée indépendamment par application.
+
+  
+  Il existe un accord juste dans l’industrie selon lequel il n’existe
+  pas de «chaîne unique pour les gouverner toutes». Hyperledger Fabric
+  peut être configuré de plusieurs manières pour répondre aux diverses
+  exigences de la solution dans de nombreux cas d'utilisation.
+
+* Blockchains publiques VS blockchains privées 
+
+  Dans une blockchain publique, pratiquement tout le monde peut
+  participer et chaque participant est anonyme. Dans un tel contexte,
+  il ne peut y avoir aucune confiance autre que celle que l'état de la
+  blockchain, avant une certaine profondeur, est immuable. Afin de
+  pallier cette absence de confiance, les chaînes de blocs publiques
+  utilisent généralement une crypto-monnaie ou des frais de
+  transaction «minés» pour inciter économiquement à compenser les
+  coûts extraordinaires liés à la participation à une forme de
+  consensus byzantin tolérant aux fautes, basé sur une "preuve de
+  travail" (PoW Proof of Work).
+
+  Les blockchains privées, quant à elles, exploitent une blockchain
+  parmi un ensemble de participants connus, identifiés et souvent
+  contrôlés, opérant selon un modèle de gouvernance offrant un certain
+  degré de confiance. Une blockchain privée fournit un moyen de
+  sécuriser les interactions entre un groupe d'entités ayant un
+  objectif commun mais ne se faisant pas entièrement confiance. En
+  s'appuyant sur l'identité des participants, une blockchain privée
+  peut utiliser des protocoles de consensus plus classiques (CFT crash
+  fault tolerant) ou des protocoles de consensus tolérants aux fautes
+  byzantines (BFT byzantine fault tolerance) ne  nécessitant pas une
+  extraction coûteuse.
+
+  En outre, dans un tel contexte privé, le risque qu'un participant
+  introduit intentionnellement un code malveillant via un contrat
+  intelligent est réduit. Premièrement, les participants sont connus
+  les uns des autres et toutes les actions, qu'il s'agisse de
+  soumettre des transactions d'application, de modifier la
+  configuration du réseau ou de déployer un contrat intelligent, sont
+  enregistrées dans la blockchain conformément à une politique
+  d'approbation établie pour le réseau et le type de transaction
+  correspondant. Plutôt que d'être complètement anonyme, le coupable
+  peut être facilement identifié et l'incident traité conformément aux
+  termes du modèle de gouvernance.
+
+* Contrats Intelligents (Smart Contracts)
+
+  Un contrat intelligent, ou ce que Fabric appelle «chaincode»,
+  fonctionne comme une application distribuée de confiance qui tire sa
+  sécurité / confiance de la blockchain et du consensus sous-jacent
+  parmi les pairs. C'est la logique métier d'une application
+  blockchain.
+
+  Voici trois points clés qui s'appliquent aux contrats intelligents,
+  en particulier lorsqu'appliqués à une plate-forme :
+
+  + de nombreux contrats intelligents s'exécutent simultanément sur le
+    réseau,
+  + ils peuvent être déployés de manière dynamique (dans de nombreux
+    cas par quiconque), et
+  + Le code de l'application doit être traité comme non fiable, voire
+    malveillant.
+
+   
+  La plupart des plates-formes blockchain compatibles avec les
+  contrats intelligents existants suivent une architecture d’ordre
+  d’exécution dans laquelle le protocole de consensus :
+
+  + valide et ordonne les transactions puis les propage à tous les
+    nœuds homologues,
+  + chaque pair exécute ensuite les transactions de manière
+    séquentielle.
+
+    
+  L'architecture order-execute est présente dans la quasi-totalité des
+  systèmes blockchain existants, des plates-formes publiques / sans
+  autorisation telles que [[https://ethereum.org/][Ethereum]] (avec consensus basé sur le PoW)
+  aux plates-formes privées telles que [[https://tendermint.com/][Tendermint]], [[https://chain.com/][Chain]] et [[http://www.jpmorgan.com/global/Quorum][Quorum]].
+
+  Les contrats intelligents exécutés dans une blockchain fonctionnant
+  avec l'architecture ordre-exécution doivent être déterministes;
+  sinon, un consensus pourrait ne jamais être atteint. Pour résoudre
+  le problème du non-déterminisme, de nombreuses plates-formes exigent
+  que les contrats intelligents soient écrits dans un langage non
+  standard ou spécifique à un domaine (tel que [[https://solidity.readthedocs.io/en/v0.4.23/][Solidity]]), afin
+  d'éliminer les opérations non déterministes. Cela empêche une
+  adoption généralisée car les développeurs qui rédigent des contrats
+  intelligents doivent apprendre un nouveau langage, ce qui peut
+  entraîner des erreurs de programmation.
+
+  De plus, étant donné que toutes les transactions sont exécutées de
+  manière séquentielle par tous les nœuds, les performances et
+  l’échelle sont limitées. Le fait que le code de contrat intelligent
+  s'exécute sur chaque nœud du système exige que des mesures complexes
+  soient prises pour protéger l'ensemble du système des contrats
+  potentiellement malveillants afin de garantir la résilience de
+  l'ensemble du système.
+  
+* Une nouvelle approche
+
+  Fabric introduit une nouvelle architecture pour les transactions que
+  nous appelons execute-order-validate. Il résout les problèmes de
+  résilience, de flexibilité, d'évolutivité, de performance et de
+  confidentialité auxquels est confronté le modèle order-execute en
+  séparant le flux de transaction en trois étapes :
+
+  + /exécuter/ une transaction et vérifier son exactitude, ce qui
+    l'endosse, 
+  + /commander/ les transactions via un protocole de consensus
+    (enfichable), et 
+  + /valider/ les transactions par rapport à une politique
+    d'approbation spécifique à une application avant de les valider
+    pour le registre.
+
+    
+  Cette conception s'écarte radicalement du paradigme
+  commande-exécution en ce sens que Fabric exécute les transactions
+  avant de parvenir à un accord final sur leur commande.
+
+  Dans Fabric, une stratégie d'approbation spécifique à l'application
+  spécifie les nœuds pairs, ou le nombre d'entre eux, devant
+  garantir la bonne exécution d'un contrat intelligent donné. Ainsi,
+  chaque transaction ne doit être exécutée (endossée) que par le
+  sous-ensemble de nœuds pairs nécessaire pour satisfaire la
+  politique d’endossement de la transaction. Cela permet une exécution
+  en parallèle augmentant les performances globales et l’ampleur du
+  système. Cette première phase élimine également tout
+  non-déterminisme, dans la mesure où les résultats incohérents
+  peuvent être filtrés avant la commande.
+
+  Parce que nous avons éliminé le non-déterminisme, Fabric est la
+  première technologie blockchain à permettre l’utilisation de
+  langages de programmation standard. Dans la version 1.1.0, les
+  contrats intelligents peuvent être écrits en Go ou en Node.js, alors
+  qu'il est prévu de prendre en charge d'autres langages populaires, y
+  compris Java, dans les versions ultérieures.
+
+* Intimité et confidentialité
+
+  Comme nous en avons discuté, dans un réseau public blockchain sans
+  autorisation qui exploite PoW pour son modèle de consensus, les
+  transactions sont exécutées sur chaque nœud. Cela signifie qu'il ne
+  peut y avoir de confidentialité des contrats eux-mêmes, ni des
+  données de transaction qu'ils traitent. Chaque transaction, ainsi
+  que le code qui la met en œuvre, est visible pour chaque nœud du
+  réseau. Dans ce cas, nous avons échangé la confidentialité du
+  contrat et des données pour un consensus tolérant aux fautes
+  byzantines fourni par PoW.
+
+  Ce manque de confidentialité peut être problématique pour de
+  nombreux cas d'utilisation d'entreprises. Par exemple, dans un
+  réseau de partenaires de la chaîne d’approvisionnement, des tarifs
+  préférentiels pourraient être proposés à certains consommateurs afin
+  de consolider une relation ou de promouvoir des ventes
+  supplémentaires. Si chaque participant peut voir chaque contrat et
+  chaque transaction, il devient impossible de maintenir de telles
+  relations commerciales dans un réseau totalement transparent - tout
+  le monde voudra avoir les tarifs préférentiels !
+
+  Comme second exemple, considérons le secteur des valeurs mobilières,
+  dans lequel un opérateur qui crée une position (ou en cède une) ne
+  voudrait pas que ses concurrents soient au courant, sinon ils
+  chercheront à se lancer dans le jeu, ce qui affaiblira leur
+  portefeuille.
+
+  Afin de remédier au manque d'intimité et de confidentialité
+  afin de répondre aux exigences en matière d'utilisation par les
+  entreprises, les plates-formes blockchain ont adopté diverses
+  approches. Toutes ont leurs compromis.
+
+  Le chiffrement des données est une approche de la
+  confidentialité. Cependant, dans un réseau sans permission qui
+  exploite le PoW pour son consensus, les données chiffrées se trouvent
+  sur chaque nœud. Avec suffisamment de temps et de ressources
+  informatiques, le chiffrement pourrait être rompu. Pour de nombreux
+  cas d'utilisation d'entreprise, le risque que leurs informations
+  soient compromises est inacceptable.
+
+  ZKP (Zero Knowledge Proof) est un autre domaine de recherche à
+  l’étude pour remédier à ce problème. En contrepartie, le calcul d’un
+  ZKP nécessite actuellement beaucoup de temps et de ressources
+  informatiques. Par conséquent, le compromis dans ce cas est la
+  performance pour la confidentialité.
+
+  Dans un contexte privé pouvant exploiter d'autres formes de
+  consensus, on pourrait explorer des approches limitant la diffusion
+  d'informations confidentielles exclusivement aux nœuds autorisés.
+
+  Hyperledger Fabric, en tant que plate-forme privée, permet la
+  confidentialité via son architecture de canal. Fondamentalement, les
+  participants d’un réseau Fabric peuvent établir un «canal» entre le
+  sous-ensemble de participants à qui une visibilité doit être
+  accordée pour un ensemble particulier de transactions. Pensez à cela
+  comme une superposition de réseau. Ainsi, seuls les nœuds qui
+  participent à un canal ont accès au contrat intelligent (chaincode)
+  et aux données traitées, en préservant l'intimité et la
+  confidentialité des deux.
+
+  Pour améliorer ses capacités en matière d'intimité et de
+  confidentialité, Fabric a ajouté la prise en charge des [[https://hyperledger-fabric.readthedocs.io/en/release-1.4/private-data/private-data.html][données
+  privées]] et travaille à l’absence de preuves de connaissances (ZKP)
+  disponibles à l’avenir. Plus sur cela comme il devient disponible.
+
+* Pluggable Consensus
+
+  L'ordre des transactions est délégué à un composant modulaire à des
+  fins de consensus, qui est découplé logiquement des pairs qui
+  exécutent les transactions et gèrent le registre. Plus précisément,
+  le service de commande. Le consensus étant modulaire, sa mise en
+  œuvre peut être adaptée à l'hypothèse de confiance d'un déploiement
+  ou d'une solution donnés. Cette architecture modulaire permet à la
+  plate-forme de s’appuyer sur des kits d’outils bien établis pour les
+  commandes CFT (tolérance aux pannes en cas de collision) ou BFT
+  (tolérance aux pannes byzantine).
+
+  Fabric propose actuellement deux implémentations de service de
+  commande CFT. Le premier est basé sur la [[https://etcd.io/][bibliothèque]] =etcd= du
+  protocole [[chrome-extension://oemmndcbldboiebfnladdacbdfmadadm/https://raft.github.io/raft.pdf][Raft]]. L'autre est [[https://kafka.apache.org/][Kafka]] (qui utilise [[https://zookeeper.apache.org/][Zookeeper]] en
+  interne). Pour plus d'informations sur les services de commande
+  actuellement disponibles, consultez notre [[https://hyperledger-fabric.readthedocs.io/en/release-1.4/orderer/ordering_service.html][documentation conceptuelle]]
+  sur la commande.
+
+  Notez également que ceux-ci ne sont pas mutuellement exclusifs. Un
+  réseau Fabric peut avoir plusieurs services de commande prenant en
+  charge différentes applications ou exigences d'applications.
+  
+* Performance et passage à l'échelle
+  
+  Les performances d'une plate-forme blockchain peuvent être affectées
+  par de nombreuses variables telles que la taille de la transaction,
+  la taille du bloc, la taille du réseau, ainsi que les limites du
+  matériel, etc. La communauté Hyperledger développe actuellement un
+  ensemble de [[https://docs.google.com/document/d/1DQ6PqoeIH0pCNJSEYiw7JVbExDvWh_ZRVhWkuioG4k0/edit#heading=h.t3gztry2ja8i][mesures provisoires]] au sein du groupe de travail
+  Performance et échelle. , ainsi que la mise en œuvre correspondante
+  d’un cadre d’analyse comparative appelé [[https://hyperledger.org/projects/caliper][Hyperledger Caliper]].
+
+  Bien que ce travail continue à être développé et devrait être
+  considéré comme une mesure définitive des performances de la
+  plate-forme blockchain et de ses caractéristiques d’échelle, une
+  équipe d’IBM Research a publié un article [[https://arxiv.org/abs/1801.10228v1][revu par des pairs]]
+  évaluant l’architecture et les performances de Hyperledger
+  Fabric. Le document propose une discussion approfondie de
+  l’architecture de Fabric, puis décrit l’évaluation des performances
+  de la plate-forme par l’équipe à l’aide d’une version préliminaire
+  de Hyperledger Fabric v1.1.
+
+  Les efforts d'analyse comparative menés par l'équipe de recherche
+  ont abouti à un nombre important d'améliorations de performances
+  pour la version Fabric v1.1.0, qui ont plus que doublé les
+  performances globales de la plate-forme par rapport aux versions
+  v1.0.0.
+  
+* Conclusion
+
+  Toute évaluation sérieuse des plates-formes blockchain devrait
+  inclure Hyperledger Fabric dans sa liste restreinte.
+
+  Combinées, les capacités de différenciation de Fabric en font un
+  système hautement évolutif pour les blockchains autorisées prenant en
+  charge des hypothèses de confiance flexibles qui permettent à la
+  plate-forme de prendre en charge un large éventail de cas
+  d'utilisation du secteur, allant du gouvernement au financement, en
+  passant par la logistique de la chaîne logistique, les soins de
+  santé, etc. beaucoup plus.
+
+  Plus important encore, Hyperledger Fabric est le plus actif des dix
+  projets Hyperledger (actuellement). Le développement de la
+  communauté autour de la plate-forme est en croissance constante et
+  l'innovation apportée avec chaque publication successive dépasse de
+  loin toutes les autres plates-formes de blockchain d'entreprise.
+
+* Remerciements  
+
+  Ce qui précède est tiré de «[[https://arxiv.org/abs/1801.10228v2][Tissu Hyperledger: un système]]
+  d’exploitation distribué pour chaînes de blocs autorisées»: Elli
+  Androulaki, Artem Barger, Vita Bortnikov, Christian Cachin,
+  Konstantinos Christidis, Angelo De Caro, David Enyeart, Christopher
+  Ferris, Gennady Laventman, Yacov Manevich, Srinivasan Muralidharan,
+  Chet Murthy, Binh Nguyen, Manish Sethi, Gari Singh, Keith Smith,
+  Alessandro Sorniotti, Chrysoula Stathakopoulou, Marko Vukolic,
+  Sharon Weed Cocco, Jason Yellick

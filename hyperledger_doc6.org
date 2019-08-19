@@ -1,0 +1,225 @@
+#+TITLE: Concepts clés : Modèle
+#+AUTHOR: Laurent Garnier
+
+* Modèle Hyperledger Fabric
+
+  Cette section décrit les principales caractéristiques de conception
+  intégrées à Hyperledger Fabric qui remplissent sa promesse d’une
+  solution de blockchain d’entreprise complète, mais personnalisable :
+
+  + [[https://hyperledger-fabric.readthedocs.io/en/release-1.4/fabric_model.html#assets][Actif]] - Les définitions d'actif permettent l'échange de presque
+    tout ce qui a une valeur monétaire sur le réseau, des aliments
+    entiers aux voitures anciennes en passant par les futures sur
+    devises.
+  + [[https://hyperledger-fabric.readthedocs.io/en/release-1.4/glossary.html#chaincode][Chaincode]] - L'exécution de code de chaîne est partitionnée à
+    partir de l'ordre des transactions, ce qui limite les niveaux de
+    confiance et de vérification requis pour tous les types de nœuds
+    et optimise l'évolutivité et les performances du réseau.
+  + [[https://hyperledger-fabric.readthedocs.io/en/release-1.4/fabric_model.html#ledger-features][Fonctions du registre]] - Le registre partagé immuable code
+    l'historique complet des transactions pour chaque canal et inclut
+    une fonction de requête de type SQL pour un audit et une
+    résolution des litiges efficaces.
+  + [[https://hyperledger-fabric.readthedocs.io/en/release-1.4/fabric_model.html#privacy][Intimité]] - Les canaux et la collecte de données privées
+    permettent des transactions multilatérales privées et
+    confidentielles généralement requises par les entreprises
+    concurrentes et les industries réglementées qui échangent des
+    actifs sur un réseau commun.
+  + [[https://hyperledger-fabric.readthedocs.io/en/release-1.4/fabric_model.html#security-membership-services][Services de sécurité et d’adhésion]] - L’adhésion autorisée fournit
+    un réseau blockchain de confiance, dans lequel les participants
+    savent que toutes les transactions peuvent être détectées et
+    suivies par les autorités de contrôle et les auditeurs autorisés.
+  + [[https://hyperledger-fabric.readthedocs.io/en/release-1.4/glossary.html#consensus][Consensus]] - Une approche unique du consensus permet la flexibilité
+    et l'évolutivité nécessaires à l'entreprise.
+
+** Actifs
+
+   Les actifs peuvent aller du matériel corporel (immobilier et
+   matériel) à l’immatériel (contrats et propriété
+   intellectuelle). Hyperledger Fabric offre la possibilité de
+   modifier des actifs à l'aide de transactions en chaincode.
+
+   Les actifs sont représentés dans la structure Hyperledger en tant
+   que collection de paires clé-valeur, les changements d’état étant
+   enregistrés en tant que transactions dans un registre [[https://hyperledger-fabric.readthedocs.io/en/release-1.4/glossary.html#channel][Channel]]. Les
+   actifs peuvent être représentés sous forme binaire et / ou JSON.
+
+   Vous pouvez facilement définir et utiliser des ressources dans vos
+   applications Hyperledger Fabric à l'aide de l'outil [[https://github.com/hyperledger/composer][Hyperledger Composer]].
+
+** Chaincode
+
+   Le code de chaîne de caractères est un logiciel définissant un ou
+   plusieurs actifs, ainsi que les instructions de transaction
+   permettant de modifier le ou les actifs; en d’autres termes, c’est
+   la logique métier. Chaincode applique les règles pour la lecture ou
+   la modification des paires clé-valeur ou d'autres informations de
+   la base de données d'état. Les fonctions de code de chaîne
+   s’exécutent dans la base de données d’état actuelle du grand-livre
+   et sont lancées via une proposition de transaction. L'exécution de
+   code par chaîne donne un ensemble d'écritures clé-valeur (ensemble
+   d'écriture) qui peuvent être soumises au réseau et appliquées au
+   registre sur tous les pairs.
+
+** Fonctions du registre
+
+   Le registre est l'enregistrement séquencé et inviolable de
+   toutes les transitions d'état dans le tissu. Les transitions
+   d’états résultent d’appels de chaincodes («transactions») soumises
+   par les parties participantes. Chaque transaction produit un
+   ensemble de paires clé-valeur d’actif qui sont validées dans le
+   registre en tant que crée, met à jour ou supprime.
+
+   Le registre est composé d’une blockchain (chaîne) pour stocker
+   l’enregistrement séquencé immuable, en blocs, ainsi que d’une base
+   de données d’états permettant de conserver l’état actuel de la
+   structure. Il y a un registre par canal. Chaque pair conserve
+   une copie du registre pour chaque canal dont il est membre.
+
+   Quelques fonctions d'un registre Fabric : 
+
+   + Interrogez et mettez à jour le registre à l'aide de recherches
+     basées sur des clés, de requêtes de plages et de requêtes de clés
+     composites.
+   + Requêtes en lecture seule utilisant un langage de requête enrichi
+     (si vous utilisez CouchDB comme base de données d'état)
+   + Requêtes d'historique en lecture seule - Interrogez l'historique
+     du journal pour une clé permettant des scénarios de provenance
+     des données.
+   + Les transactions sont constituées des versions des clés / valeurs
+     lues en chaincode (read set) et des clés / valeurs écrites en
+     chaincode (write set)
+   + Les transactions contiennent les signatures de chaque pair
+     endosseur et sont soumises au service de commande.
+   + Les transactions sont ordonnées en blocs et sont «livrées» d'un
+     service de commande à des pairs sur un canal.
+   + Les pairs valident les transactions par rapport aux politiques
+     d’endossement et les appliquent
+   + Avant d'ajouter un bloc, une vérification de version est
+     effectuée pour s'assurer que les états des actifs lus n'ont pas
+     changé depuis le temps d'exécution du code de chaîne.
+   + Il y a immuabilité une fois qu'une transaction est validée et
+     validée
+   + Le registre d’un canal contient un bloc de configuration
+     définissant les politiques, les listes de contrôle d’accès et
+     d’autres informations pertinentes.
+   + Les canaux contiennent des instances de [[https://hyperledger-fabric.readthedocs.io/en/release-1.4/glossary.html#msp][fournisseur de services]]
+     d'adhésion permettant de dériver des documents cryptographiques
+     de différentes autorités de certification.
+
+    
+   Reportez-vous à la rubrique [[https://hyperledger-fabric.readthedocs.io/en/release-1.4/ledger.html][Registre]] pour une analyse plus
+   approfondie des bases de données, de la structure de stockage et de
+   "capacité de requête".
+
+** Intimité
+
+   Hyperledger Fabric utilise un registre immuable canal par canal,
+   ainsi qu'un code chaîne permettant de manipuler et de modifier
+   l'état actuel des actifs (c'est-à-dire de mettre à jour les paires
+   clé-valeur). Un grand livre existe dans le champ d'un canal - il
+   peut être partagé sur l'ensemble du réseau (en supposant que chaque
+   participant fonctionne sur un canal commun) - ou il peut être
+   privatisé pour n'inclure qu'un ensemble spécifique de participants.
+
+   Dans ce dernier scénario, ces participants créeraient un canal
+   séparé et isoleraient / sépareraient ainsi leurs transactions et
+   leur grand livre. Afin de résoudre des scénarios qui cherchent à
+   combler le fossé entre transparence totale et confidentialité,
+   chaincode ne peut être installé que sur des homologues devant
+   accéder aux états des actifs pour effectuer des lectures et des
+   écritures (autrement dit, si un chaincode n'est pas installé sur un
+   homologue , il ne sera pas en mesure d’interfacer correctement avec
+   le grand livre).
+   
+   Lorsqu'un sous-ensemble d'organisations sur ce canal doit garder
+   leurs données de transaction confidentielles, une collecte de
+   données privée (collecte) est utilisée pour séparer ces données
+   dans une base de données privée, séparée logiquement du registre
+   des canaux, accessible uniquement au sous-ensemble autorisé
+   d'organisations.
+
+   Ainsi, les canaux gardent les transactions privées du réseau plus
+   large tandis que les collections gardent les données privées entre
+   les sous-ensembles d'organisations sur le canal.
+
+   Pour masquer davantage les données, vous pouvez chiffrer
+   (partiellement ou totalement) les valeurs contenues dans le code de
+   chaîne à l'aide d'algorithmes cryptographiques courants tels que
+   AES avant d'envoyer des transactions au service de commande et
+   d'ajouter des blocs au grand livre. Une fois que les données
+   chiffrées ont été écrites dans le grand livre, elles ne peuvent
+   être déchiffrées que par un utilisateur en possession de la clé
+   correspondante utilisée pour générer le texte chiffré. Pour plus
+   d'informations sur le cryptage de code de chaîne, voir la rubrique
+   [[https://hyperledger-fabric.readthedocs.io/en/release-1.4/chaincode4ade.html][Chaincode pour les développeurs]].
+
+   Reportez-vous à la rubrique [[https://hyperledger-fabric.readthedocs.io/en/release-1.4/private-data-arch.html][Données privées]] pour plus de détails
+   sur la protection de votre réseau blockchain.   
+
+** Sécurité et services d'adhésion
+
+   Hyperledger Fabric repose sur un réseau transactionnel où tous les
+   participants ont une identité connue. L'infrastructure à clé
+   publique est utilisée pour générer des certificats cryptographiques
+   liés aux organisations, aux composants réseau, aux utilisateurs
+   finaux ou aux applications client. En conséquence, le contrôle
+   d'accès aux données peut être manipulé et régi sur le réseau plus
+   large et au niveau des canaux. Cette notion «autorisée» de
+   structure Hyperledger, associée à l’existence et aux capacités des
+   canaux, permet de traiter des scénarios dans lesquels la
+   confidentialité et la confidentialité sont des préoccupations
+   primordiales.
+
+   Consultez la rubrique [[https://hyperledger-fabric.readthedocs.io/en/release-1.4/msp.html][Fournisseurs de services d’appartenance (MSP)]]
+   pour mieux comprendre les implémentations cryptographiques et
+   l’approche signature, vérification, authentification utilisée dans
+   Hyperledger Fabric.
+
+** Consensus 
+
+   Dans la technologie du grand livre distribué, le consensus est
+   récemment devenu synonyme d'un algorithme spécifique, au sein d'une
+   seule fonction. Cependant, le consensus ne se limite pas à un
+   simple accord sur l’ordre des transactions. Hyperledger Fabric
+   souligne cette différenciation par son rôle fondamental dans
+   l’ensemble du flux des transactions, de la proposition à
+   l’approbation, en passant par la commande, la validation et
+   l’engagement. En bref, le consensus est défini comme la
+   vérification du cercle complet de la correction d'un ensemble de
+   transactions comprenant un bloc.
+
+   Le consensus est finalement atteint lorsque l'ordre et les
+   résultats des transactions d'un bloc ont satisfait aux
+   vérifications de critères de politique explicites. Ces contrôles
+   ont lieu pendant le cycle de vie d’une transaction et incluent
+   l’utilisation de stratégies d’endossement pour déterminer quels
+   membres spécifiques doivent approuver une certaine classe de
+   transaction, ainsi que des codes chaincodes système pour garantir
+   le respect et l’application de ces stratégies. Avant de s’engager,
+   les homologues emploieront ces codes de chaîne pour s’assurer qu’un
+   nombre suffisant d’endossements est présent et qu’ils ont été
+   dérivés des entités appropriées. En outre, une vérification de la
+   gestion des versions aura lieu au cours de laquelle l'état actuel
+   du grand livre est convenu ou approuvé, avant que les blocs
+   contenant des transactions ne soient ajoutés au grand livre. Cette
+   dernière vérification fournit une protection contre les opérations
+   à double dépense et les autres menaces susceptibles de compromettre
+   l'intégrité des données, et permet l'exécution de fonctions sur des
+   variables non statiques.
+
+   In addition to the multitude of endorsement, validity and
+   versioning checks that take place, there are also ongoing identity
+   verifications happening in all directions of the transaction
+   flow. Access control lists are implemented on hierarchical layers
+   of the network (ordering service down to channels), and payloads
+   are repeatedly signed, verified and authenticated as a transaction
+   proposal passes through the different architectural components. To
+   conclude, consensus is not merely limited to the agreed upon order
+   of a batch of transactions; rather, it is an overarching
+   characterization that is achieved as a byproduct of the ongoing
+   verifications that take place during a transaction’s journey from
+   proposal to commitment.
+
+   Consultez le diagramme de [[https://hyperledger-fabric.readthedocs.io/en/release-1.4/txflow.html][flux de transaction]] pour une
+   représentation visuelle du consensus.
+

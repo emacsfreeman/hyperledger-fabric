@@ -1,0 +1,314 @@
+#+TITLE: Concepts clés : Introduction
+#+AUTHOR: Laurent Garnier
+
+* Introduction
+
+  Hyperledger Fabric est une plate-forme pour les solutions de
+  registre distribuées reposant sur une architecture modulaire offrant
+  des degrés élevés de confidentialité, de résilience, de flexibilité
+  et d'évolutivité. Il est conçu pour prendre en charge les
+  implémentations enfichables de différents composants et pour prendre
+  en charge la complexité et les subtilités de l'écosystème
+  économique.
+
+  Nous recommandons aux utilisateurs novices de commencer par la suite
+  de l’introduction ci-dessous afin de se familiariser avec le
+  fonctionnement des blockchains et avec les fonctionnalités et
+  composants spécifiques de Hyperledger Fabric.
+
+  Une fois à l'aise - ou si vous êtes déjà familiarisé avec blockchain
+  et Hyperledger Fabric - allez à la section [[https://hyperledger-fabric.readthedocs.io/en/release-1.4/getting_started.html][Démarrage]] et explorez à
+  partir de là les démonstrations, les spécifications techniques, les
+  API, etc.
+  
+
+** Qu'est-ce qu'une blockchain ?
+*** Un registre distribué
+
+    Au cœur d'un réseau blockchain se trouve un registre distribué
+    qui enregistre toutes les transactions effectuées sur le réseau.
+
+    Un registre blockchain est souvent décrit comme décentralisé car
+    il est répliqué sur de nombreux participants au réseau, chacun
+    collaborant à sa maintenance. Nous verrons que la décentralisation
+    et la collaboration sont des attributs puissants qui reflètent la
+    manière dont les entreprises échangent des biens et des services
+    dans le monde réel.
+
+    [[./basic_network.png]]
+
+    En plus d'être décentralisées et collaboratives, les informations
+    enregistrées dans une blockchain sont uniquement ajoutées, en
+    utilisant des techniques cryptographiques qui garantissent qu'une
+    fois qu'une transaction a été ajoutée au registre, elle ne peut
+    pas être modifiée. Cette propriété d '«immuabilité» facilite la
+    détermination de la provenance des informations, car les
+    participants peuvent être certains que les informations n'ont pas
+    été modifiées après coup. C’est pourquoi les blockchains sont
+    parfois décrits comme des systèmes de preuve.
+
+*** Des contrats intelligents
+
+    Pour prendre en charge la mise à jour cohérente des informations -
+    et pour activer toute une série de fonctions du registre
+    (transaction, interrogation, etc.) - un réseau blockchain utilise
+    des contrats intelligents pour fournir un accès contrôlé au grand
+    livre.
+
+    [[./Smart_Contract.png]]
+
+    Les contrats intelligents ne sont pas seulement un mécanisme clé
+    pour encapsuler des informations et les garder simples sur le
+    réseau, ils peuvent également être écrits pour permettre aux
+    participants d’exécuter automatiquement certains aspects des
+    transactions.
+
+    Un contrat intelligent peut, par exemple, être écrit pour stipuler
+    le coût d'expédition d'un article lorsque les frais d'expédition
+    changent en fonction de la rapidité avec laquelle l'article
+    arrive. Avec les conditions convenues par les deux parties et
+    écrites dans le registre, les fonds appropriés changent de
+    mains automatiquement à la réception de l’article.
+
+*** Consensus
+
+    Le processus de synchronisation des transactions du registre
+    sur le réseau - pour s'assurer que les grands livres ne sont mis à
+    jour que lorsque les transactions sont approuvées par les
+    participants appropriés, et que lorsque les grands livres sont mis
+    à jour, elles sont mises à jour avec les mêmes transactions dans
+    le même ordre - est appelé consensus.
+
+    [[./consensus.png]]
+
+    Vous en apprendrez beaucoup plus sur les grands livres, les
+    contrats intelligents et le consensus plus tard. Pour le moment,
+    il suffit de penser à une blockchain comme à un système
+    transactionnel partagé et répliqué, qui est mis à jour via des
+    contrats intelligents et maintenu constamment synchronisé via un
+    processus collaboratif appelé consensus.
+
+** Pourquoi une blockchain est utile ?
+*** Systèmes d'enregistrement d'aujourd'hui 
+
+    Les réseaux transactionnels d’aujourd’hui ne sont guère plus que
+    des versions légèrement mises à jour des réseaux existant depuis
+    la tenue des registres de l'entreprise. Les membres d'un réseau
+    professionnel effectuent des transactions entre eux, mais ils
+    conservent des enregistrements séparés de leurs transactions. Et
+    les objets qu’ils traitent - qu’il s’agisse de tapisseries
+    flamandes du XVIe siècle ou de titres d’aujourd’hui - doivent
+    avoir leur provenance établie chaque fois qu’elles sont vendues
+    afin de garantir que l’entreprise vendant un objet possède une
+    chaîne de titre vérifiant sa propriété. il.
+
+    Il ne vous reste plus qu’un réseau d’affaires ressemblant à ceci :
+
+    [[./current_network.png]]
+
+    La technologie moderne a pris ce processus des tablettes de pierre
+    et des dossiers en papier aux disques durs et aux plateformes
+    cloud, mais la structure sous-jacente est la même. Il n’existe pas
+    de systèmes unifiés de gestion de l’identité des participants au
+    réseau, la détermination de la provenance étant si laborieuse que
+    le rapprochement des transactions sur titres (le volume mondial
+    est chiffré en milliers de milliards de dollars), les contrats
+    doivent être signés et exécutés manuellement. chaque base de
+    données du système contient des informations uniques et représente
+    donc un point de défaillance unique.
+
+    Avec l’approche fragmentée d’aujourd’hui en matière de partage
+    d’informations et de processus, il est impossible de créer un
+    système d’enregistrement qui couvre un réseau d’entreprise, même
+    si les besoins de visibilité et de confiance sont clairs.
+
+*** La différence de blockchain
+
+    Et si, au lieu du nid d’inefficacités du rat représenté par le
+    système de transactions «moderne», les réseaux d’entreprise
+    avaient des méthodes standard pour établir l’identité sur le
+    réseau, exécuter des transactions et stocker des données? Et si
+    l’établissement de la provenance d’un actif pouvait être déterminé
+    en consultant une liste de transactions qui, une fois écrites, ne
+    pouvaient plus être modifiées et pouvaient donc être fiables?
+
+    Ce réseau d'affaires ressemblerait davantage à ceci :
+
+    [[./future_net.png]]
+
+    Il s'agit d'un réseau blockchain dans lequel chaque participant
+    dispose de sa propre copie répliquée du registre. En plus des
+    informations de registre partagées, les processus qui mettent à
+    jour le registre sont également partagés. Contrairement aux
+    systèmes d’aujourd’hui, où les programmes privés d’un participant
+    servent à mettre à jour son registre, un système blockchain
+    dispose de programmes partagés pour mettre à jour un registre.
+
+    Avec la possibilité de coordonner leur réseau professionnel via un
+    registre partagé, les réseaux blockchain peuvent réduire le
+    temps, les coûts et les risques associés aux informations et au
+    traitement confidentiels, tout en améliorant la confiance et la
+    visibilité.
+
+    Vous savez maintenant ce qu'est la blockchain et pourquoi elle est
+    utile. Beaucoup d'autres détails sont importants, mais ils ont
+    tous trait à ces idées fondamentales du partage de l'information
+    et des processus.
+
+** Qu'est-ce que Hyperledger Fabric ?
+
+   La Linux Foundation a fondé le projet Hyperledger en 2015 dans le
+   but de faire progresser les technologies multisectorielles
+   blockchain. Plutôt que de déclarer une seule norme de chaîne de
+   blocs, il encourage une approche collaborative pour développer des
+   technologies de chaînes de blocs via un processus communautaire,
+   avec des droits de propriété intellectuelle qui encouragent le
+   développement ouvert et l'adoption de normes clés dans le temps.
+
+   Hyperledger Fabric est l’un des projets blockchain de
+   Hyperledger. Comme les autres technologies de la blockchain, elle
+   possède un registre, utilise des contrats intelligents et
+   constitue un système permettant aux participants de gérer leurs
+   transactions.
+
+   Hyperledger Fabric se démarque de certains autres systèmes
+   blockchain, c’est qu’il est privé et autorisé. Plutôt qu'un système
+   ouvert sans permission permettant à des identités inconnues de
+   participer au réseau (nécessitant des protocoles tels que la
+   «preuve de travail» pour valider les transactions et sécuriser le
+   réseau), les membres d'un réseau Hyperledger Fabric s'enregistrent
+   via un fournisseur de services d'adhésion (MSP) approuvé. 
+
+   Hyperledger Fabric propose également plusieurs options
+   connectables. Les données du registre peuvent être stockées dans
+   plusieurs formats, les mécanismes de consensus peuvent être
+   échangés et les différents MSP pris en charge.
+
+   Hyperledger Fabric offre également la possibilité de créer des
+   canaux, permettant à un groupe de participants de créer un grand
+   livre de transactions séparé. C’est une option particulièrement
+   importante pour les réseaux où certains participants peuvent être
+   des concurrents et ne pas vouloir de toutes les transactions qu’ils
+   effectuent - un prix spécial qu’ils offrent à certains participants
+   et pas à d’autres, par exemple - connus de chaque participant. Si
+   deux participants forment un canal, ceux-ci - et aucun autre - ont
+   des copies du registre pour ce canal.
+
+*** Un registre partagé
+
+    Hyperledger Fabric comporte un sous-système de registre
+    comprenant deux composants: l'état du monde et le journal des
+    transactions. Chaque participant dispose d'une copie du grand
+    livre sur chaque réseau Hyperledger Fabric auquel il appartient.
+
+    La composante d'état mondial décrit l'état du registre à un
+    moment donné. C’est la base de données du registre. Le
+    composant du journal des transactions enregistre toutes les
+    transactions ayant abouti à la valeur actuelle de l'état du
+    monde. c’est l’historique des mises à jour pour l’état mondial. Le
+    registre est donc une combinaison de la base de données d'état
+    mondiale et de l'historique du journal des transactions.
+
+    Le registre a un magasin de données remplaçable pour l’état du
+    monde. Par défaut, il s'agit d'une base de données de magasin de
+    clés-valeurs LevelDB. Le journal des transactions n'a pas besoin
+    d'être enfichable. Il enregistre simplement les valeurs avant et
+    après de la base de données de registre utilisée par le réseau
+    de chaînes de blocs.
+
+*** Des contrats intelligents
+
+    Les contrats intelligents Hyperledger Fabric sont écrits en chaîne
+    de code et sont appelés par une application externe à la
+    blockchain lorsque cette application doit interagir avec le grand
+    livre. Dans la plupart des cas, le code de chaîne n'interagit
+    qu'avec le composant base de données du registre, l'état du
+    monde (l'interrogation, par exemple) et non le journal des
+    transactions.
+
+    Chaincode peut être implémenté dans plusieurs langages de
+    programmation. Actuellement, Go et Node sont pris en charge.
+
+    
+*** Intimité
+
+    Selon les besoins d'un réseau, les participants à un réseau
+    interentreprises (B2B) peuvent être extrêmement sensibles au
+    volume d'informations qu'ils partagent. Pour les autres réseaux,
+    la confidentialité ne sera pas une préoccupation majeure.
+
+    Hyperledger Fabric prend en charge les réseaux où la
+    confidentialité (utilisation de canaux) est une exigence
+    opérationnelle essentielle, ainsi que les réseaux relativement
+    ouverts.
+
+*** Consensus
+
+    Les transactions doivent être écrites dans le registre dans
+    l'ordre dans lequel elles se produisent, même si elles se situent
+    entre différents ensembles de participants au sein du réseau. Pour
+    que cela se produise, il faut définir l’ordre des transactions et
+    mettre en place une méthode permettant de rejeter les transactions
+    erronées insérées dans le registre par erreur (ou de manière
+    malveillante).
+
+    Il s’agit d’un domaine de l’informatique qui a fait l’objet de
+    recherches approfondies. Il existe de nombreuses façons de le
+    réaliser, chacune avec des compromis différents. Par exemple, PBFT
+    (Practical Byzantine Fault Tolerance) peut fournir un mécanisme
+    permettant aux réplicas de fichiers de communiquer les uns avec
+    les autres afin de garder chaque copie cohérente, même en cas de
+    corruption. Alternativement, en Bitcoin, la commande s'effectue
+    via un processus appelé extraction, où les ordinateurs concurrents
+    s'affrontent pour résoudre un casse-tête cryptographique qui
+    définit l'ordre sur lequel tous les processus s'appuient par la
+    suite.
+
+    Hyperledger Fabric a été conçu pour permettre aux utilisateurs
+    débutants de choisir un mécanisme de consensus qui représente le
+    mieux les relations existant entre les participants. Comme pour la
+    vie privée, il existe une gamme de besoins; des réseaux qui sont
+    très structurés dans leurs relations à ceux qui sont plus
+    peer-to-peer.
+
+    Nous en apprendrons davantage sur les mécanismes consensuels
+    Hyperledger Fabric, qui incluent actuellement SOLO, Kafka et Raft.
+    
+** Où puis-je en apprendre plus ?
+
+   + [[https://hyperledger-fabric.readthedocs.io/en/release-1.4/identity/identity.html][Identité]] (documentation conceptuelle)
+
+     Un document conceptuel qui décrit le rôle essentiel joué par les
+     identités dans un réseau Fabric (à l'aide d'une structure PKI
+     établie et de certificats x.509).
+   + [[https://hyperledger-fabric.readthedocs.io/en/release-1.4/membership/membership.html][Adhésion]] (documentation conceptuelle)
+
+     Discussions via le rôle de fournisseur de service d’appartenance
+     (MSP), qui convertit les identités en rôles dans un réseau
+     Fabric.
+   + [[https://hyperledger-fabric.readthedocs.io/en/release-1.4/peers/peers.html][Pairs]] (documentation conceptuelle)
+   
+     Les pairs - appartenant à des organisations - hébergent le
+     registre et les contrats intelligents et constituent la structure
+     physique d'un réseau Fabric.
+   + [[https://hyperledger-fabric.readthedocs.io/en/release-1.4/build_network.html][Construire votre premier réseau]] (tutoriel)
+   
+     Apprenez à télécharger des fichiers binaires Fabric et à amorcer
+     votre propre réseau exemple avec un script exemple. Arrêtez
+     ensuite le réseau et découvrez comment il a été construit, une
+     étape à la fois.
+   + [[https://hyperledger-fabric.readthedocs.io/en/release-1.4/write_first_app.html][Rédaction de votre première application]] (tutoriel)
+   
+     Déploie un réseau très simple - encore plus simple que Build Your
+     First Network - à utiliser avec un simple contrat et une
+     application intelligents.
+   + [[https://hyperledger-fabric.readthedocs.io/en/release-1.4/txflow.html][Flux de transaction]]
+     
+     Regard de haut niveau sur un exemple de flux de transaction.
+   + [[https://hyperledger-fabric.readthedocs.io/en/release-1.4/fabric_model.html][Modèle de Hyperledger Fabric]]
+
+     Un aperçu détaillé de certains composants et concepts évoqués
+     dans cette introduction, ainsi que de quelques autres, et décrit
+     leur interaction dans un exemple de flux de transactions.
+
+

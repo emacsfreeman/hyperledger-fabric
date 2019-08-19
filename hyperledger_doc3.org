@@ -1,0 +1,16 @@
+#+TITLE: Concepts clés
+#+AUTHOR: Laurent Garnier
+
+* [[https://hyperledger-fabric.readthedocs.io/en/release-1.4/blockchain.html][Introduction]]
+* [[https://hyperledger-fabric.readthedocs.io/en/release-1.4/functionalities.html][Fonctionnalités Hyperledger Fabric]]
+* [[https://hyperledger-fabric.readthedocs.io/en/release-1.4/fabric_model.html][Modèle Hyperledger Fabric]]
+* [[https://hyperledger-fabric.readthedocs.io/en/release-1.4/network/network.html][Réseau Blockchain]]
+* [[https://hyperledger-fabric.readthedocs.io/en/release-1.4/identity/identity.html][Identité]]
+* [[https://hyperledger-fabric.readthedocs.io/en/release-1.4/membership/membership.html][Adhésion]]
+* [[https://hyperledger-fabric.readthedocs.io/en/release-1.4/peers/peers.html][Pairs]]
+* [[https://hyperledger-fabric.readthedocs.io/en/release-1.4/smartcontract/smartcontract.html][Contrats intelligents et chaincode]]
+* [[https://hyperledger-fabric.readthedocs.io/en/release-1.4/ledger/ledger.html][Registre]]
+* [[https://hyperledger-fabric.readthedocs.io/en/release-1.4/orderer/ordering_service.html][Le service de commande]]
+* [[https://hyperledger-fabric.readthedocs.io/en/release-1.4/private-data/private-data.html][Données privées]]
+* [[https://hyperledger-fabric.readthedocs.io/en/release-1.4/capabilities_concept.html][Capacités du canal]]
+* [[https://hyperledger-fabric.readthedocs.io/en/release-1.4/usecases.html][Cas d'usages]]

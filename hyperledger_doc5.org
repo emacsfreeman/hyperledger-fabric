@@ -1,0 +1,87 @@
+#+TITLE: Concepts clés : Fonctionnalités
+#+AUTHOR: Laurent Garnier
+
+* Fonctionnalités Hyperledger Fabric
+
+  Hyperledger Fabric est une implémentation de la technologie DLT
+  (Distributed Ledger) offrant une sécurité, une évolutivité, une
+  confidentialité et des performances réseau adaptées aux entreprises,
+  dans une architecture blockchain modulaire. Hyperledger Fabric
+  fournit les fonctionnalités réseau suivantes de la blockchain :
+
+
+** Gestion de l'identité
+
+   Pour activer les réseaux autorisés, Hyperledger Fabric fournit un
+   service d'identité de membre qui gère les ID utilisateur et
+   authentifie tous les participants du réseau. Les listes de contrôle
+   d'accès peuvent être utilisées pour fournir des couches
+   d'autorisation supplémentaires via l'autorisation d'opérations
+   réseau spécifiques. Par exemple, un ID utilisateur spécifique peut
+   être autorisé à appeler une application de code de chaîne, mais ne
+   peut pas déployer un nouveau code de chaîne.
+
+** Intimité et confidentialité
+
+   Hyperledger Fabric permet aux intérêts commerciaux concurrents et à
+   tous les groupes nécessitant des transactions privées et
+   confidentielles de coexister sur le même réseau autorisé. Les
+   canaux privés sont des chemins de messagerie restreints qui peuvent
+   être utilisés pour assurer la confidentialité des transactions et
+   la confidentialité de sous-ensembles spécifiques de membres du
+   réseau. Toutes les données, y compris les informations de
+   transaction, de membre et de canal, sur un canal sont invisibles et
+   inaccessibles à tous les membres du réseau n’ayant pas
+   explicitement accès à ce canal.
+   
+
+** Traitement efficace
+
+   Hyperledger Fabric attribue des rôles réseau par type de nœud. Pour
+   assurer la simultanéité et le parallélisme au réseau, l'exécution
+   des transactions est séparée de l'ordre et de l'engagement des
+   transactions. L'exécution des transactions avant de les commander
+   permet à chaque nœud homologue de traiter plusieurs transactions
+   simultanément. Cette exécution simultanée augmente l'efficacité du
+   traitement sur chaque homologue et accélère la livraison des
+   transactions au service de commande.
+
+   En plus de permettre le traitement en parallèle, la division du
+   travail libère les nœuds de commande des exigences d'exécution des
+   transactions et de maintenance du grand livre, tandis que les nœuds
+   homologues sont libérés des charges de travail de commande
+   (consensus). Cette séparation des rôles limite également le
+   traitement requis pour l'autorisation et l'authentification; tous
+   les nœuds homologues n'ont pas besoin de faire confiance à tous les
+   nœuds de commande, et inversement, de sorte que les processus sur
+   l'un peuvent s'exécuter indépendamment de la vérification effectuée
+   par l'autre.
+
+
+** Fonctionnalité chaincode
+
+   Les applications en code à code codent la logique qui est invoquée
+   par des types spécifiques de transactions sur le canal. Le code de
+   chaîne qui définit les paramètres d'un changement de propriété d'un
+   actif, par exemple, garantit que toutes les transactions
+   transférant la propriété sont soumises aux mêmes règles et
+   exigences. Le code de chaîne du système se distingue en tant que
+   code de chaîne qui définit les paramètres de fonctionnement de la
+   totalité du canal. Le code de chaîne du cycle de vie et du système
+   de configuration définit les règles du canal; Le chaincode du
+   système d’endossement et de validation définit les conditions
+   requises pour endosser et valider les transactions.
+
+
+** Conception modulaire
+
+   Hyperledger Fabric implémente une architecture modulaire pour
+   offrir un choix fonctionnel aux concepteurs de réseaux. Des
+   algorithmes spécifiques pour l’identité, la commande (consensus) et
+   le chiffrement, par exemple, peuvent être connectés à n’importe
+   quel réseau Hyperledger Fabric. Le résultat est une architecture de
+   blockchain universelle que toute industrie ou domaine public peut
+   adopter, avec l'assurance que ses réseaux seront interopérables
+   entre les frontières du marché, réglementaires et géographiques.
+
+
