@@ -1,0 +1,1251 @@
+#+TITLE: Concepts clés : réseau blockchain
+#+AUTHOR: Laurent Garnier
+
+* Réseau blockchain
+
+  Cette rubrique décrit, au niveau conceptuel, comment Hyperledger
+  Fabric permet aux organisations de collaborer à la formation de
+  réseaux blockchain. Si vous êtes un architecte, un administrateur
+  ou un développeur, vous pouvez utiliser cette rubrique pour bien
+  comprendre les principaux composants de la structure et du
+  processus d’un réseau de chaînes de blocs Hyperledger Fabric. Cette
+  rubrique utilisera un exemple pratique gérable qui présente tous
+  les principaux composants d’un réseau blockchain. Après avoir
+  compris cet exemple, vous pouvez lire des informations plus
+  détaillées sur ces composants ailleurs dans la documentation ou
+  essayer de [[https://hyperledger-fabric.readthedocs.io/en/release-1.4/build_network.html][créer un exemple de réseau]].
+
+  Après avoir lu cette rubrique et compris le concept de stratégies,
+  vous comprendrez parfaitement les décisions que les organisations
+  doivent prendre pour établir les stratégies qui contrôlent un réseau
+  Hyperledger Fabric déployé. Vous comprendrez également comment les
+  organisations gèrent l'évolution du réseau à l'aide de stratégies
+  déclaratives, une fonctionnalité clé de Hyperledger Fabric. En un
+  mot, vous comprendrez les principaux composants techniques de
+  Hyperledger Fabric et les décisions que les entreprises doivent
+  prendre à leur sujet.
+
+** Qu'est-ce qu'un réseau blockchain ?
+
+   Un réseau de blockchain est une infrastructure technique qui
+   fournit aux applications des services de grand livre et de contrat
+   intelligent (chaincode). Les contrats intelligents sont
+   principalement utilisés pour générer des transactions qui sont
+   ensuite distribuées à chaque nœud homologue du réseau où elles sont
+   immuablement enregistrées sur leur copie du grand livre. Les
+   utilisateurs d'applications peuvent être des utilisateurs finaux
+   utilisant des applications client ou des administrateurs réseau
+   blockchain.
+
+   Dans la plupart des cas, plusieurs [[https://hyperledger-fabric.readthedocs.io/en/release-1.4/glossary.html#organization][organisations]] se regroupent pour
+   former un [[https://hyperledger-fabric.readthedocs.io/en/release-1.4/glossary.html#consortium][consortium]] et leurs autorisations sont déterminées par un
+   ensemble de [[https://hyperledger-fabric.readthedocs.io/en/release-1.4/glossary.html#policy][règles]] approuvées par le consortium lors de la
+   configuration initiale du réseau. De plus, les stratégies de réseau
+   peuvent évoluer dans le temps sous réserve de l'accord des
+   organisations du consortium, comme nous le découvrirons lorsque
+   nous discuterons du concept de stratégie de modification.
+
+** Un exemple de réseau
+
+   Avant de commencer, voyons ce que nous visons! Voici un diagramme
+   représentant l'état final de notre exemple de réseau.
+
+   Ne craignez pas que cela paraisse compliqué! Au fur et à mesure que
+   nous abordons ce sujet, nous construirons le réseau pièce par pièce
+   afin de vous montrer comment les organisations R1, R2, R3 et R4
+   apportent une infrastructure au réseau pour contribuer à sa
+   constitution. Cette infrastructure implémente le réseau de chaînes
+   de blocs et est régie par des règles convenues par les
+   organisations qui forment le réseau, par exemple, qui peuvent
+   ajouter de nouvelles organisations. Vous découvrirez comment les
+   applications consomment les services de grand livre et de contrats
+   intelligents fournis par le réseau blockchain.
+
+   [[./network.diagram.1.png]]
+
+   Quatre organisations, R1, R2, R3 et R4 ont décidé conjointement et
+   sont parties à un accord de créer et d'exploiter un réseau
+   Hyperledger Fabric. R4 a été désigné pour être l'initiateur du
+   réseau - il a été autorisé à configurer la version initiale du
+   réseau. R4 n'a pas l'intention d'effectuer des transactions
+   commerciales sur le réseau. R1 et R2 ont besoin de communications
+   privées au sein du réseau global, tout comme R2 et
+   R3. L'organisation R1 dispose d'une application client pouvant
+   effectuer des transactions commerciales dans le canal
+   C1. L'organisation R2 dispose d'une application cliente capable
+   d'effectuer un travail similaire dans les canaux C1 et
+   C2. L'organisation R3 dispose d'une application cliente capable de
+   le faire sur le canal C2. Le noeud pair P1 conserve une copie du
+   journal L1 associé à C1. Le noeud pair P2 conserve une copie du
+   grand livre L1 associé à C1 et une copie du grand livre L2 associé
+   à C2. Le noeud pair P3 conserve une copie du grand livre L2 associé
+   à C2. Le réseau est régi conformément aux règles de politique
+   spécifiées dans la configuration de réseau NC4. Le réseau est sous
+   le contrôle des organisations R1 et R4. Le canal C1 est régi
+   conformément aux règles de politique spécifiées dans la
+   configuration de canal CC1; le canal est sous le contrôle des
+   organisations R1 et R2. Le canal C2 est régi conformément aux
+   règles de politique spécifiées dans la configuration de canal CC2;
+   le canal est sous le contrôle des organisations R2 et R3. Il existe
+   un service de commande O4 qui sert de point d'administration réseau
+   pour N et utilise le canal système. Le service de commande prend
+   également en charge les canaux d'application C1 et C2, aux fins de
+   la commande de transaction en blocs à distribuer. Chacune des
+   quatre organisations a une autorité de certification préférée.
+
+** Créer le réseau
+
+   Commençons par le début en créant la base du réseau :
+
+   [[./network.diagram.2.png]]
+
+   Le réseau est formé quand un client est démarré. Dans notre exemple
+   de réseau, N, le service de commande comprenant un seul nœud, O4,
+   est configuré selon une configuration de réseau NC4, qui donne des
+   droits administratifs à l'organisation R4. Au niveau du réseau,
+   l’autorité de certification CA4 est utilisée pour distribuer les
+   identités aux administrateurs et aux nœuds de réseau de
+   l’organisation R4.
+
+   Nous pouvons voir que la première chose qui définit un réseau, N,
+   est un service de commande, O4. Pensez au service de commande comme
+   point d’administration initiale du réseau. Comme convenu
+   auparavant, O4 est initialement configuré et démarré par un
+   administrateur de l'organisation R4, puis hébergé dans R4. La
+   configuration NC4 contient les règles décrivant l'ensemble de
+   démarrage des capacités administratives pour le
+   réseau. Initialement, ceci est configuré pour ne donner que les
+   droits R4 sur le réseau. Cela va changer, comme nous le verrons
+   plus tard, mais pour le moment, R4 est le seul membre du réseau.
+
+*** Autorités de certification
+
+    Vous pouvez également voir une autorité de certification, CA4,
+    utilisée pour émettre des certificats aux administrateurs et aux
+    nœuds de réseau. CA4 joue un rôle clé dans notre réseau car il
+    distribue des certificats X.509 pouvant être utilisés pour
+    identifier les composants comme appartenant à l'organisation
+    R4. Les certificats émis par les autorités de certification
+    peuvent également être utilisés pour signer des transactions afin
+    d'indiquer qu'une organisation endosse le résultat de la
+    transaction, condition préalable à son acceptation dans le grand
+    livre. Examinons ces deux aspects d’une autorité de certification
+    plus en détail.
+
+    Premièrement, différents composants du réseau blockchain utilisent
+    des certificats pour s’identifier comme appartenant à une
+    organisation particulière. C’est pourquoi il existe généralement
+    plus d’une autorité de certification prenant en charge un réseau
+    blockchain. Différentes organisations utilisent souvent
+    différentes autorités de certification. Nous allons utiliser
+    quatre CA dans notre réseau; un pour chaque organisation. En
+    effet, les CA sont si importants que Hyperledger Fabric vous en
+    fournit un logiciel intégré (appelé Fabric-CA) pour vous aider à
+    démarrer, même si dans la pratique, les entreprises choisiront
+    d'utiliser leur propre CA.
+
+    Le mappage des certificats aux organisations membres est réalisé
+    via une structure appelée [[https://hyperledger-fabric.readthedocs.io/en/release-1.4/glossary.html#membership-services][fournisseur de services d’appartenance]]
+    (MSP). Configuration réseau NC4 utilise un MSP nommé pour
+    identifier les propriétés des certificats délivrés par CA4 qui
+    associent les détenteurs de certificats à l'organisation R4. NC4
+    peut ensuite utiliser ce nom MSP dans les politiques pour accorder
+    aux acteurs de R4 des droits particuliers sur les ressources
+    réseau. Un exemple d'une telle stratégie consiste à identifier les
+    administrateurs de la version 4 qui peuvent ajouter de nouvelles
+    organisations membres au réseau. Nous ne montrons pas les MSP sur
+    ces diagrammes, car ils les encombreraient, mais ils sont très
+    importants.
+
+    Deuxièmement, nous verrons plus loin comment les certificats émis
+    par les autorités de certification sont au cœur du processus de
+    génération et de validation des [[https://hyperledger-fabric.readthedocs.io/en/release-1.4/glossary.html#transaction][transactions]]. Plus précisément,
+    les certificats X.509 sont utilisés dans les [[https://hyperledger-fabric.readthedocs.io/en/release-1.4/glossary.html#proposal][propositions de
+    transaction]] d'application client et les [[https://hyperledger-fabric.readthedocs.io/en/release-1.4/glossary.html#response][réponses de transaction]] de
+    contrat intelligent pour signer numériquement des
+    [[https://hyperledger-fabric.readthedocs.io/en/release-1.4/glossary.html#transaction][transactions]]. Par la suite, les nœuds de réseau qui hébergent des
+    copies du grand livre vérifient que les signatures de transaction
+    sont valides avant d'accepter des transactions sur le grand livre.
+
+    Récapitulons la structure de base de notre exemple de réseau
+    blockchain. Il existe une ressource, le réseau N, accessible à un
+    ensemble d’utilisateurs défini par une autorité de certification
+    CA4, qui dispose d’un ensemble de droits sur les ressources du
+    réseau N, comme décrit dans les règles contenues dans une
+    configuration de réseau NC4. Tout cela devient réel lorsque nous
+    configurons et démarrons le nœud de service de commande O4.
+
+** Ajout d'administrateurs de réseau
+
+   NC4 a été initialement configuré pour n'autoriser que les droits
+   administratifs des utilisateurs de R4 sur le réseau. Dans cette
+   prochaine phase, nous allons permettre aux utilisateurs de
+   l’organisation R1 d’administrer le réseau. Voyons comment le réseau
+   évolue :
+
+   [[./network.diagram.2.1.png]]
+
+   L'organisation R4 met à jour la configuration du réseau pour faire
+   de l'organisation R1 un administrateur également. Après ce point,
+   R1 et R4 ont les mêmes droits sur la configuration du réseau.
+
+   Nous voyons l'ajout d'une nouvelle organisation R1 en tant
+   qu'administrateur - R1 et R4 ont maintenant des droits égaux sur le
+   réseau. Nous pouvons également constater que l'autorité de
+   certification CA1 a été ajoutée. Elle peut être utilisée pour
+   identifier les utilisateurs de l'organisation R1. Après ce moment,
+   les utilisateurs de R1 et de R4 peuvent administrer le réseau.
+
+   Although the orderer node, O4, is running on R4’s infrastructure,
+   R1 has shared administrative rights over it, as long as it can gain
+   network access. It means that R1 or R4 could update the network
+   configuration NC4 to allow the R2 organization a subset of network
+   operations. In this way, even though R4 is running the ordering
+   service, and R1 has full administrative rights over it, R2 has
+   limited rights to create new consortia.
+
+   In its simplest form, the ordering service is a single node in the
+   network, and that’s what you can see in the example. Ordering
+   services are usually multi-node, and can be configured to have
+   different nodes in different organizations. For example, we might
+   run O4 in R4 and connect it to O2, a separate orderer node in
+   organization R1. In this way, we would have a multi-site,
+   multi-organization administration structure.
+
+   Nous aborderons le service de commande [[https://hyperledger-fabric.readthedocs.io/en/release-1.4/network/network.html#the-ordering-service][un peu plus loin]] dans cette
+   rubrique, mais pour l’instant, considérons le service de commande
+   comme un point d’administration qui fournit à différentes
+   organisations un accès contrôlé au réseau.
+
+** Définir un consortium
+
+   Bien que le réseau puisse maintenant être administré par R1 et R4,
+   très peu peut être fait. La première chose à faire est de définir
+   un consortium. Ce mot signifie littéralement “un groupe avec un
+   destin partagé”, il s’agit donc d’un choix approprié pour un
+   ensemble d’organisations dans un réseau blockchain.
+
+   Voyons comment est défini un consortium :
+
+   [[./network.diagram.3.png]]
+
+   Un administrateur réseau définit un consortium X1 composé de deux
+   membres, les organisations R1 et R2. Cette définition du consortium
+   est stockée dans la configuration du réseau NC4 et sera utilisée à
+   la prochaine étape du développement du réseau. CA1 et CA2 sont les
+   autorités de certification respectives pour ces organisations.
+
+   En raison de la configuration de NC4, seuls R1 ou R4 peuvent créer
+   de nouveaux consortiums. Ce diagramme montre l’ajout d’un nouveau
+   consortium, X1, qui définit R1 et R2 comme ses organisations
+   constitutives. Nous pouvons également constater que CA2 a été
+   ajouté pour identifier les utilisateurs de R2. Notez qu'un
+   consortium peut avoir un nombre illimité de membres
+   organisationnels - nous venons d'en montrer deux car il s'agit de
+   la configuration la plus simple.
+
+   Pourquoi les consortiums sont-ils importants? Nous pouvons voir
+   qu'un consortium définit l'ensemble des organisations du réseau qui
+   partagent le même besoin de traiter, dans ce cas, R1 et R2. Il est
+   vraiment judicieux de regrouper des organisations si elles ont un
+   objectif commun, et c’est exactement ce qui se passe.
+
+   Le réseau, bien que créé par une seule organisation, est maintenant
+   contrôlé par un plus grand nombre d’organisations. Nous aurions pu
+   commencer de cette façon, avec R1, R2 et R4 ayant un contrôle
+   partagé, mais cette mise en place le rend plus facile à comprendre.
+
+   Nous allons maintenant utiliser le consortium X1 pour créer une
+   partie très importante d’une blockchain de tissu Hyperledger, un
+   canal.
+
+** Créer un canal pour un consortium
+
+   Créons donc cette partie clé du réseau Fabric Blockchain - un
+   canal. Un canal est un mécanisme de communication principal par
+   lequel les membres d'un consortium peuvent communiquer entre
+   eux. Il peut y avoir plusieurs canaux dans un réseau, mais pour
+   l’instant, nous en commencerons avec un.
+
+   Voyons comment le premier canal a été ajouté au réseau :
+
+   [[./network.diagram.4.png]]
+
+   Un canal C1 a été créé pour R1 et R2 en utilisant la définition du
+   consortium X1. Le canal est régi par une configuration de canal
+   CC1, complètement distincte de la configuration du réseau. CC1 est
+   géré par R1 et R2 qui ont des droits égaux sur C1. R4 n’a aucun
+   droit sur CC1.
+
+   Le canal C1 fournit un mécanisme de communication privé au
+   consortium X1. Nous pouvons voir que le canal C1 a été connecté au
+   service de commande O4 mais que rien d’autre n’y est associé. Dans
+   la prochaine étape du développement du réseau, nous allons
+   connecter des composants tels que des applications clientes et des
+   nœuds homologues. Mais à ce stade, un canal représente le potentiel
+   de connectivité future.
+
+   Même si le canal C1 fait partie du réseau N, il en est tout à fait
+   distinctif. Notez également que les organisations R3 et R4 ne sont
+   pas dans ce canal - il s’agit du traitement des transactions entre
+   R1 et R2. Dans l'étape précédente, nous avons vu comment R4 pouvait
+   accorder à R1 l'autorisation de créer de nouveaux consortiums. Il
+   est utile de mentionner que R4 a également permis à R1 de créer des
+   canaux! Dans ce diagramme, l’organisation R1 ou R4 aurait pu créer
+   un canal C1. Encore une fois, notez qu’un certain nombre
+   d’organisations peuvent être connectées à un canal. Nous en avons
+   montré deux car il s’agit de la configuration la plus simple.
+
+   Notez à nouveau que la configuration du canal C1 est complètement
+   distincte, CC1, de la configuration de réseau NC4. CC1 contient les
+   politiques qui régissent les droits que R1 et R2 ont sur le canal
+   C1 - et comme nous l’avons vu, R3 et R4 n’ont pas d’autorisations
+   sur ce canal. R3 et R4 ne peuvent interagir avec C1 que s'ils sont
+   ajoutés par R1 ou R2 à la politique appropriée dans la
+   configuration de canal CC1. Un exemple consiste à définir qui peut
+   ajouter une nouvelle organisation au canal. Notez que R4 ne peut
+   pas s'ajouter lui-même au canal C1. Il doit et ne peut être
+   autorisé que par R1 ou R2.
+
+   Pourquoi les canaux sont-ils si importants? Les canaux sont utiles
+   car ils fournissent un mécanisme pour les communications privées et
+   les données privées entre les membres d'un consortium. Les canaux
+   assurent la confidentialité des autres canaux et du
+   réseau. Hyperledger Fabric est un outil puissant à cet égard, car
+   il permet aux organisations de partager une infrastructure et de la
+   garder privée en même temps. Ici, il n’ya pas de contradiction:
+   différents consortiums du réseau auront besoin de partager de
+   manière appropriée les informations et les processus, et les canaux
+   constituent un mécanisme efficace pour le faire. Les canaux
+   permettent un partage efficace de l'infrastructure tout en
+   préservant la confidentialité des données et des communications.
+
+   Nous pouvons également constater qu’une fois qu'un canal a été
+   créé, il est dans un sens très réel «libre du réseau». Seules les
+   organisations explicitement spécifiées dans une configuration de
+   canal en ont le contrôle à partir de maintenant. De même, toute
+   mise à jour de la configuration réseau NC4 à partir de cet instant
+   n'aura aucun effet direct sur la configuration du canal CC1; Par
+   exemple, si la définition du consortium X1 est modifiée, les
+   membres du canal C1 ne seront pas affectés. Les canaux sont donc
+   utiles car ils permettent des communications privées entre les
+   organisations constituant le canal. De plus, les données d'un canal
+   sont complètement isolées du reste du réseau, y compris des autres
+   canaux.
+
+   En passant, il existe également un canal système spécial défini
+   pour être utilisé par le service de commande. Il se comporte
+   exactement comme un canal ordinaire, parfois appelé canal
+   d’application pour cette raison. Nous n’avons normalement pas
+   besoin de nous inquiéter pour ce canal, mais nous en discuterons un
+   peu plus à ce sujet [[https://hyperledger-fabric.readthedocs.io/en/release-1.4/network/network.html#the-ordering-service][plus loin dans cette rubrique]].
+
+** Noeuds pairs et registres
+
+   Commençons maintenant à utiliser le canal pour connecter ensemble
+   le réseau de chaînes de blocs et les composants
+   organisationnels. Dans la prochaine étape du développement du
+   réseau, nous pouvons voir que notre réseau N vient d’acquérir deux
+   nouveaux composants, à savoir un nœud homologue P1 et une instance
+   de grand livre, L1.
+
+   [[./network.diagram.5.png]]
+
+   Un noeud homologue P1 a rejoint le canal C1. P1 héberge
+   physiquement une copie du grand livre L1. P1 et O4 peuvent
+   communiquer entre eux via le canal C1.
+
+   Les nœuds homologues sont les composants du réseau sur lesquels
+   sont hébergées des copies du registre de la blockchain! Enfin, nous
+   commençons à voir des composants reconnaissables de la blockchain!
+   L’objet de P1 sur le réseau est uniquement d’héberger une copie du
+   grand livre L1 pour que d’autres y aient accès. On peut penser que
+   L1 est physiquement hébergé sur P1, mais logiquement hébergé sur le
+   canal C1. Nous verrons cette idée plus clairement lorsque nous
+   ajouterons plus de pairs à la chaîne.
+
+   Un élément clé de la configuration de P1 est une identité X.509
+   émise par CA1 qui associe P1 à l’organisation R1. Une fois que P1
+   est démarré, il peut rejoindre le canal C1 en utilisant le donneur
+   d'ordre O4. Lorsque O4 reçoit cette demande de participation, il
+   utilise la configuration du canal CC1 pour déterminer les
+   autorisations de P1 sur ce canal. Par exemple, CC1 détermine si P1
+   peut lire et / ou écrire des informations dans le grand livre L1.
+
+   Notez que les organisations qui en sont propriétaires joignent les
+   pairs aux canaux et que, même si nous n’avons ajouté qu’un seul
+   pair, nous verrons qu’il peut y avoir plusieurs nœuds de pairs sur
+   plusieurs canaux du réseau. Nous verrons les différents rôles que
+   les pairs peuvent jouer un peu plus tard.
+
+** Applications et contrats intelligents chaincode
+
+   Maintenant que le canal C1 a un grand livre dessus, nous pouvons
+   commencer à connecter des applications clientes pour utiliser
+   certains des services fournis par le cheval de bataille du grand
+   livre, le pair !
+
+   Notez comment le réseau s'est développé :
+
+   [[./network.diagram.6.png]]
+
+   Un contrat intelligent S5 a été installé sur P1. L'application
+   client A1 de l'organisation R1 peut utiliser S5 pour accéder au
+   grand livre via le noeud homologue P1. A1, P1 et O4 sont tous
+   reliés au canal C1, c’est-à-dire qu’ils peuvent tous utiliser les
+   fonctions de communication fournies par ce canal.
+
+   Dans l'étape suivante du développement du réseau, nous pouvons voir
+   que l'application cliente A1 peut utiliser le canal C1 pour se
+   connecter à des ressources de réseau spécifiques. Dans ce cas, A1
+   peut se connecter à la fois au nœud homologue P1 et au nœud de
+   commande O4. Encore une fois, voyez à quel point les canaux sont au
+   cœur de la communication entre les composants réseau et
+   organisation. Tout comme les pairs et les commandants, une
+   application cliente aura une identité qui l'associe à une
+   organisation. Dans notre exemple, l'application cliente A1 est
+   associée à l'organisation R1; et bien que ce soit en dehors du
+   réseau Fabric blockchain, il y est connecté via le canal C1.
+
+   Il peut maintenant sembler qu'A1 peut accéder au grand livre L1
+   directement via P1, mais en réalité, tous les accès sont gérés via
+   un programme spécial appelé code de chaîne codée Smart, S5. Pensez
+   à S5 comme définissant tous les modèles d’accès communs au grand
+   livre; S5 fournit un ensemble bien défini de moyens par lesquels le
+   grand livre L1 peut être interrogé ou mis à jour. En bref,
+   l'application cliente A1 doit passer par le contrat intelligent S5
+   pour accéder au grand livre L1 !
+
+   Les chaincodes de contrat intelligents peuvent être créés par les
+   développeurs d’applications de chaque organisation pour mettre en
+   œuvre un processus commercial partagé par les membres du
+   consortium. Les contrats intelligents sont utilisés pour aider à
+   générer des transactions qui peuvent ensuite être distribuées à
+   tous les nœuds du réseau. Nous discuterons de cette idée un peu
+   plus tard. il sera plus facile de comprendre quand le réseau est
+   plus grand. Pour le moment, il est important de comprendre que pour
+   arriver à ce point, deux opérations doivent avoir été effectuées
+   sur le contrat intelligent; il doit avoir été installé, puis
+   instancié.
+
+*** Installer un contrat intelligent
+
+    Lorsqu'un contrat intelligent S5 a été développé, un
+    administrateur de l'organisation R1 doit l'installer sur le noeud
+    homologue P1. C’est une opération simple; après cela, P1 a une
+    connaissance complète de S5. Plus précisément, P1 peut voir la
+    logique d'implémentation de S5 - le code de programme qu'il
+    utilise pour accéder au ledger L1. Nous contrastons avec
+    l’interface S5 qui décrit simplement les entrées et les sorties de
+    S5, sans tenir compte de sa mise en œuvre.
+
+    Lorsqu'une organisation a plusieurs pairs dans un canal, elle peut
+    choisir les pairs sur lesquels elle installe des contrats
+    intelligents. il n'est pas nécessaire d'installer un contrat
+    intelligent sur chaque poste pair.
+
+*** Instantier un contrat intelligent
+
+    Cependant, du fait que P1 a installé S5, les autres composants
+    connectés au canal C1 n’en ont pas conscience; il doit d'abord
+    être [[https://hyperledger-fabric.readthedocs.io/en/release-1.4/glossary.html#instantiate][instancié]] sur le canal C1. Dans notre exemple, qui ne
+    comporte qu'un seul noeud homologue P1, un administrateur de
+    l'organisation R1 doit instancier S5 sur le canal C1 à l'aide de
+    P1. Après l'instanciation, chaque composant du canal C1 est
+    informé de l'existence de S5; et dans notre exemple, cela signifie
+    que S5 peut maintenant être [[https://hyperledger-fabric.readthedocs.io/en/release-1.4/glossary.html#invoke][appelé]] par l'application cliente A1 !
+
+    Notez que bien que tous les composants du canal puissent désormais
+    accéder à S5, ils ne peuvent pas voir sa logique de
+    programme. Cela reste privé pour les nœuds qui l’ont installé;
+    dans notre exemple cela signifie P1. Conceptuellement, cela
+    signifie que c’est l’interface de contrat intelligente instanciée,
+    contrairement à l’implémentation de contrat intelligent
+    installée. Pour renforcer cette idée; L'installation d'un contrat
+    intelligent montre comment nous pensons qu'il est physiquement
+    hébergé sur un homologue, alors que l'instanciation d'un contrat
+    intelligent montre comment nous le considérons logiquement hébergé
+    par le canal.
+
+*** Politique d'endossement
+
+    L'élément le plus important des informations supplémentaires
+    fournies lors de l'instanciation est une [[https://hyperledger-fabric.readthedocs.io/en/release-1.4/glossary.html#endorsement-policy][politique
+    d'endossement]]. Il décrit quelles organisations doivent approuver
+    les transactions avant d’être acceptées par d’autres organisations
+    sur leur copie du grand livre. Dans notre exemple de réseau, les
+    transactions ne peuvent être acceptées sur le grand livre L1 que
+    si elles sont approuvées par R1 ou R2.
+
+    L’acte d’instanciation place la politique d’endossement dans la
+    configuration de canal CC1; il permet à n'importe quel membre du
+    canal d'y accéder. Vous pouvez en savoir plus sur les stratégies
+    d’endossement dans la rubrique [[https://hyperledger-fabric.readthedocs.io/en/release-1.4/txflow.html][flux de transaction]].
+
+*** Invoquer un contrat intelligent
+    
+    Une fois qu'un contrat intelligent a été installé sur un nœud
+    homologue et instancié sur un canal, il peut être [[https://hyperledger-fabric.readthedocs.io/en/release-1.4/glossary.html#invoke][appelé]] par une
+    application client. Pour ce faire, les applications clientes
+    envoient des propositions de transaction à des pairs appartenant
+    aux organisations spécifiées par la stratégie d’endossement de
+    contrat intelligent. La proposition de transaction sert d'entrée
+    au contrat intelligent, qui l'utilise pour générer une réponse de
+    transaction approuvée, qui est renvoyée par le nœud homologue à
+    l'application cliente.
+
+    Ce sont ces réponses aux transactions qui sont regroupées avec la
+    proposition de transaction pour former une transaction entièrement
+    approuvée, qui peut être distribuée sur l’ensemble du réseau. Nous
+    y reviendrons plus en détail ultérieurement. Pour l’instant, il
+    suffit de comprendre comment les applications appellent des
+    contrats intelligents pour générer des transactions endossées.
+
+    À ce stade du développement du réseau, nous pouvons constater que
+    l’organisation R1 participe pleinement au réseau. Ses
+    applications - à commencer par A1 - peuvent accéder au grand livre
+    L1 via le contrat intelligent S5 afin de générer des transactions
+    qui seront approuvées par R1 et donc acceptées sur le grand livre
+    car elles sont conformes à la politique d’endossement.
+
+** Réseau complété
+
+   Rappelons que notre objectif était de créer un canal pour le
+   consortium X1 - organisations R1 et R2. Cette phase suivante du
+   développement du réseau permet à l’organisation R2 d’ajouter son
+   infrastructure au réseau.
+
+   Voyons comment le réseau a évolué :
+
+   [[./network.diagram.7.png]]
+
+   Le réseau s'est développé grâce à l'ajout d'une infrastructure
+   issue de l'organisation R2. Plus précisément, R2 a ajouté un noeud
+   homologue P2, qui héberge une copie du journal L1, ainsi que le
+   code de chaîne S5. P2 a également rejoint le canal C1, de même que
+   l'application A2. A2 et P2 sont identifiés à l'aide des certificats
+   de CA2. Tout cela signifie que les deux applications A1 et A2
+   peuvent appeler S5 sur C1 en utilisant le noeud homologue P1 ou P2.
+
+   Nous pouvons voir que l'organisation R2 a ajouté un nœud homologue,
+   P2, sur le canal C1. P2 héberge également une copie du grand livre
+   L1 et du contrat intelligent S5. Nous pouvons voir que R2 a
+   également ajouté l'application cliente A2 qui peut se connecter au
+   réseau via le canal C1. Pour ce faire, un administrateur de
+   l'organisation R2 a créé le nœud homologue P2 et l'a connecté au
+   canal C1, de la même manière qu'un administrateur de R1.
+
+   Nous avons créé notre premier réseau opérationnel! À ce stade du
+   développement du réseau, nous disposons d’un canal dans lequel les
+   organisations R1 et R2 peuvent effectuer des transactions
+   complètes. Concrètement, cela signifie que les applications A1 et
+   A2 peuvent générer des transactions à l'aide du contrat intelligent
+   S5 et du grand livre L1 sur le canal C1.
+
+*** Générer et accepter des transactions
+
+    Contrairement aux nœuds homologues, qui hébergent toujours une
+    copie du grand livre, nous voyons qu'il existe deux types de nœuds
+    homologues différents; ceux qui hébergent des contrats
+    intelligents et ceux qui n'en ont pas. Dans notre réseau, chaque
+    pair héberge une copie du contrat intelligent, mais dans les
+    réseaux plus grands, il y aura beaucoup plus de nœuds homologues
+    qui n'hébergeront pas une copie du contrat intelligent. Un pair ne
+    peut exécuter un contrat intelligent que s'il y est installé, mais
+    il peut connaître l'interface d'un contrat intelligent en étant
+    connecté à un canal.
+
+    Vous ne devez pas penser que les nœuds homologues sur lesquels
+    aucun contrat intelligent n'est installé ne sont en quelque sorte
+    inférieurs. De plus, les nœuds homologues avec des contrats
+    intelligents ont un pouvoir spécial: aider à générer des
+    transactions. Notez que tous les nœuds homologues peuvent valider
+    et par la suite accepter ou rejeter des transactions sur leur
+    copie du ledger L1. Toutefois, seuls les nœuds homologues sur
+    lesquels un contrat intelligent est installé peuvent participer au
+    processus d’endossement de transaction, élément central de la
+    génération de transactions valides.
+
+    Nous n'avons pas besoin de nous inquiéter des détails exacts sur
+    la manière dont les transactions sont générées, distribuées et
+    acceptées dans cette rubrique. Il suffit de comprendre que nous
+    disposons d'un réseau de blockchain où les organisations R1 et R2
+    peuvent partager des informations et des processus sous forme de
+    transactions capturées par le grand livre. . Nous en apprendrons
+    beaucoup plus sur les transactions, les grands livres et les
+    contrats intelligents dans d’autres domaines.
+
+*** Types de noeuds pairs
+
+    Dans Hyperledger Fabric, bien que tous les homologues soient
+    identiques, ils peuvent assumer plusieurs rôles en fonction de la
+    configuration du réseau. Nous avons maintenant suffisamment de
+    connaissances sur une topologie de réseau typique pour décrire ces
+    rôles.
+
+    + [[https://hyperledger-fabric.readthedocs.io/en/release-1.4/glossary.html#commitment][Commis pair]]. Chaque nœud homologue d'un canal est un homologue
+      validant. Il reçoit des blocs de transactions générées, qui sont
+      ensuite validées avant d’être validées dans la copie du grand
+      livre du noeud pair en tant qu’opération d’ajout.
+    + [[https://hyperledger-fabric.readthedocs.io/en/release-1.4/glossary.html#endorsement][Endosseur pair]]. Chaque pair avec un contrat intelligent peut
+      être un pair avenant s’il dispose d’un contrat
+      intelligent. Toutefois, pour être réellement un homologue
+      endosseur, le contrat intelligent sur l'homologue doit être
+      utilisé par une application cliente pour générer une réponse de
+      transaction signée numériquement. Le terme homologue faisant
+      référence est une référence explicite à ce fait.
+
+      
+    Une politique d’endossement pour un contrat intelligent identifie
+    les organisations dont les homologues doivent signer numériquement
+    une transaction générée avant de pouvoir l’accepter sur une copie
+    homologue du grand livre.
+
+    Ce sont les deux principaux types d’homologues; un pair peut
+    adopter deux autres rôles :
+
+    + [[https://hyperledger-fabric.readthedocs.io/en/release-1.4/glossary.html#leading-peer][Chef de groupe]]. Lorsqu'une organisation a plusieurs homologues
+      dans un canal, un homologue chef est un nœud qui assume la
+      responsabilité de la répartition des transactions entre le
+      donneur d'ordre et les autres homologues engagés dans
+      l'organisation. Un pair peut choisir de participer à une
+      sélection de leadership statique ou dynamique.
+
+      Par conséquent, il est utile de penser à deux groupes de pairs
+      du point de vue du leadership: ceux qui ont une sélection de
+      chef statique et ceux qui ont une sélection de chef
+      dynamique. Pour l'ensemble statique, aucun ou plusieurs
+      homologues peuvent être configurés en tant que leaders. Pour
+      l'ensemble dynamique, un pair sera élu chef par l'ensemble. De
+      plus, dans l'ensemble dynamique, si un pair leader échoue, les
+      pairs restants rééliront un leader.
+
+      Cela signifie que les pairs d’une organisation peuvent avoir un
+      ou plusieurs responsables connectés au service de commande. Cela
+      peut aider à améliorer la résilience et l'évolutivité dans les
+      grands réseaux qui traitent de gros volumes de transactions.
+    + [[https://hyperledger-fabric.readthedocs.io/en/release-1.4/glossary.html#anchor-peer][Pair d'ancrage]]. Si un homologue doit communiquer avec un
+      homologue d'une autre organisation, il peut utiliser l'un des
+      homologues d'ancrage définis dans la configuration de canal de
+      cette organisation. Une organisation peut avoir zéro ou
+      plusieurs homologues d'ancrage définis pour elle. Un homologue
+      d'ancrage peut vous aider dans de nombreux scénarios de
+      communication inter-organisationnels différents.
+
+
+    Notez qu'un pair peut être un pair engagé, un pair endosseur, un
+    pair leader et un pair ancre en même temps! Seul le pair d'ancrage
+    est facultatif - à toutes fins pratiques, il y aura toujours un
+    pair leader, au moins un pair parrain et au moins un pair
+    validant.
+
+*** Installer pas instantier
+
+    De la même manière que l'organisation R1, l'organisation R2 doit
+    installer le contrat intelligent S5 sur son nœud homologue,
+    P2. C’est évident: si les applications A1 ou A2 souhaitent
+    utiliser S5 sur le nœud homologue P2 pour générer des
+    transactions, il doit d’abord être présent; l'installation est le
+    mécanisme par lequel cela se produit. À ce stade, le noeud pair P2
+    dispose d'une copie physique du contrat intelligent et du grand
+    livre; comme P1, il peut à la fois générer et accepter des
+    transactions sur sa copie du grand livre L1.
+
+    Cependant, contrairement à l'organisation R1, l'organisation R2
+    n'a pas besoin d'instancier le contrat intelligent S5 sur le canal
+    C1. C’est parce que S5 a déjà été instancié sur le canal par
+    l’organisation R1. L'instanciation ne doit se produire qu'une
+    seule fois; tout homologue qui rejoint ensuite le canal sait que
+    le contrat smart S5 est disponible pour le canal. Ce fait reflète
+    le fait que le grand livre L1 et le contrat intelligent existent
+    réellement de manière physique sur les nœuds homologues et de
+    manière logique sur le canal; R2 ajoute simplement une autre
+    instance physique de L1 et S5 au réseau.
+
+    Dans notre réseau, nous pouvons voir que le canal C1 relie deux
+    applications clientes, deux noeuds homologues et un service de
+    commande. Puisqu'il n'y a qu'un seul canal, il n'y a qu'un seul
+    registre logique avec lequel ces composants interagissent. Les
+    nœuds homologues P1 et P2 ont des copies identiques du grand livre
+    L1. Les copies du contrat intelligent S5 seront généralement mises
+    en œuvre de manière identique en utilisant le même langage de
+    programmation. Dans le cas contraire, elles doivent être
+    sémantiquement équivalentes.
+
+    Nous pouvons voir que l'ajout judicieux de pairs au réseau peut
+    aider à supporter un débit, une stabilité et une résilience
+    accrus. Par exemple, plus de pairs dans un réseau permettront à
+    plus d'applications de s'y connecter. et plusieurs pairs dans une
+    organisation fourniront une résilience supplémentaire en cas de
+    pannes planifiées ou non.
+
+    Tout cela signifie qu'il est possible de configurer des topologies
+    sophistiquées prenant en charge une variété d'objectifs
+    opérationnels - il n'y a pas de limite théorique à la taille d'un
+    réseau. De plus, le mécanisme technique par lequel les pairs au
+    sein d'une organisation individuelle se découvrent et communiquent
+    efficacement entre eux - le [[https://hyperledger-fabric.readthedocs.io/en/release-1.4/gossip.html#gossip-protocol][protocole de potins]] - permettra à un
+    grand nombre de nœuds de pairs de prendre en charge de telles
+    topologies.
+
+    L'utilisation judicieuse des stratégies de réseau et de canal
+    permet aux grands réseaux d'être bien gouvernés. Les organisations
+    sont libres d'ajouter des nœuds homologues au réseau tant qu'elles
+    sont conformes aux règles convenues par le réseau. Les politiques
+    de réseau et de canal créent l'équilibre entre autonomie et
+    contrôle qui caractérise un réseau décentralisé.
+
+** Simplifier le vocabulaire visuel
+
+   Nous allons maintenant simplifier le vocabulaire visuel utilisé
+   pour représenter notre exemple de réseau de chaînes de blocs. À
+   mesure que la taille du réseau augmente, les lignes initialement
+   utilisées pour nous aider à comprendre les canaux deviendront
+   lourdes. Imaginez à quel point notre diagramme serait compliqué si
+   nous ajoutions une autre application client ou homologue, ou un
+   autre canal ?
+
+   C’est ce que nous allons faire dans une minute. Avant de commencer,
+   simplifions le vocabulaire visuel. Voici une représentation
+   simplifiée du réseau que nous avons développé jusqu’à présent :
+
+   [[./network.diagram.8.png]]
+
+   Le diagramme présente les faits relatifs au canal C1 dans le réseau
+   N de la manière suivante: Les applications clientes A1 et A2
+   peuvent utiliser le canal C1 pour la communication avec les
+   homologues P1 et P2 et le client 04. Les nœuds homologues P1 et P2
+   peuvent utiliser les services de communication du canal C1. Le
+   service de commande O4 peut utiliser les services de communication
+   du canal C1. La configuration du canal CC1 s’applique au canal C1.
+
+   Notez que le schéma de réseau a été simplifié en remplaçant les
+   lignes de canal par des points de connexion, représentés par des
+   cercles bleus comprenant le numéro de canal. Aucune information n'a
+   été perdue. Cette représentation est plus évolutive car elle
+   élimine les lignes qui se croisent. Cela nous permet de représenter
+   plus clairement les grands réseaux. Nous avons réussi cette
+   simplification en nous concentrant sur les points de connexion
+   entre des composants et un canal, plutôt que sur le canal lui-même.
+
+** Ajouter une autre définition de consortium
+
+   Dans cette prochaine phase de développement du réseau, nous
+   présentons l'organisation R3. Nous allons donner aux organisations
+   R2 et R3 un canal d’application distinct qui leur permet
+   d’effectuer des transactions entre elles. Ce canal d’application
+   sera complètement séparé de celui défini précédemment, afin que les
+   transactions R2 et R3 puissent leur rester privées.
+
+   Revenons au niveau du réseau et définissons un nouveau consortium,
+   X2, pour R2 et R3 :
+
+   [[./network.diagram.9.png]]
+
+   Un administrateur réseau de l'organisation R1 ou R4 a ajouté une
+   nouvelle définition de consortium, X2, qui inclut les organisations
+   R2 et R3. Ceci sera utilisé pour définir un nouveau canal pour X2.
+
+   Notez que le réseau a maintenant deux consortiums définis: X1 pour
+   les organisations R1 et R2 et X2 pour les organisations R2 et
+   R3. Consortium X2 a été introduit afin de pouvoir créer un nouveau
+   canal pour R2 et R3.
+
+   Un nouveau canal ne peut être créé que par les organisations
+   spécifiquement identifiées dans la stratégie de configuration du
+   réseau, NC4, comme disposant des droits appropriés, c’est-à-dire R1
+   ou R4. Il s'agit d'un exemple de stratégie séparant les
+   organisations capables de gérer des ressources au niveau du réseau
+   de celles capables de gérer des ressources au niveau du canal. Voir
+   ces stratégies à l'œuvre nous aide à comprendre pourquoi
+   Hyperledger Fabric possède une structure sophistiquée de stratégies
+   à niveaux.
+
+   En pratique, la définition du consortium X2 a été ajoutée à la
+   configuration du réseau NC4. Nous discutons des mécanismes exacts
+   de cette opération ailleurs dans la documentation.
+
+** Ajouter un nouveau canal
+
+   Utilisons maintenant cette nouvelle définition de consortium, X2,
+   pour créer un nouveau canal, C2. Pour vous aider à mieux comprendre
+   la notation plus simple des canaux, nous avons utilisé les deux
+   styles visuels: le canal C1 est représenté par des points
+   d'extrémité circulaires bleus, tandis que le canal C2 est
+   représenté par des lignes de liaison rouges :
+
+   [[./network.diagram.10.png]]
+
+   Un nouveau canal C2 a été créé pour R2 et R3 en utilisant la
+   définition du consortium X2. Le canal a une configuration de canal
+   CC2 complètement distincte de la configuration de réseau NC4 et de
+   la configuration de canal CC1. Le canal C2 est géré par R2 et R3,
+   qui ont des droits égaux sur C2, tels que définis par une politique
+   dans CC2. R1 et R4 n’ont aucun droit défini dans CC2.
+
+   Le canal C2 fournit un mécanisme de communication privé au
+   consortium X2. Encore une fois, notez comment les organisations
+   réunies au sein d’un consortium sont ce qui forme les canaux. La
+   configuration de canal CC2 contient maintenant les règles qui
+   régissent les ressources de canal, attribuant des droits de gestion
+   aux organisations R2 et R3 sur le canal C2. Il est géré
+   exclusivement par R2 et R3; R1 et R4 n'ont aucun pouvoir dans le
+   canal C2. Par exemple, la configuration du canal CC2 peut ensuite
+   être mise à jour pour ajouter des organisations afin de prendre en
+   charge la croissance du réseau, mais ceci ne peut être effectué que
+   par R2 ou R3.
+
+   Notez que les configurations de canal CC1 et CC2 restent
+   complètement séparées et complètement séparées de la configuration
+   du réseau, NC4. Nous constatons à nouveau la nature décentralisée
+   d’un réseau Hyperledger Fabric; Une fois le canal C2 créé, il est
+   géré par les organisations R2 et R3 indépendamment des autres
+   éléments du réseau. Les stratégies de canal restent toujours
+   séparées les unes des autres et ne peuvent être modifiées que par
+   les organisations autorisées à le faire dans le canal.
+
+   À mesure que le réseau et les canaux évoluent, les configurations
+   du réseau et des canaux évoluent également. Il existe un processus
+   par lequel ceci est accompli de manière contrôlée - impliquant des
+   transactions de configuration qui capturent le changement apporté à
+   ces configurations. Chaque modification de configuration entraîne
+   la génération d’une nouvelle transaction de bloc de
+   configuration. Nous verrons [[https://hyperledger-fabric.readthedocs.io/en/release-1.4/network/network.html#the-ordering-serivce][plus loin dans la présente rubrique]]
+   comment ces blocs sont validés et acceptés pour créer des
+   configurations de réseau et de canal mises à jour, respectivement.
+
+*** Configurations de réseau et canal
+
+    Dans notre exemple de réseau, nous constatons l’importance des
+    configurations de réseau et de canal. Ces configurations sont
+    importantes car elles encapsulent les stratégies convenues par les
+    membres du réseau, qui fournissent une référence partagée pour
+    contrôler l'accès aux ressources du réseau. Les configurations de
+    réseau et de canal contiennent également des informations sur la
+    composition du réseau et des canaux, telles que le nom du
+    consortium et ses organisations.
+
+    Par exemple, lorsque le réseau est formé pour la première fois à
+    l'aide du nœud de service de commande O4, son comportement est
+    régi par la configuration du réseau NC4. La configuration initiale
+    de NC4 contient uniquement des règles permettant à l'organisation
+    R4 de gérer les ressources du réseau. NC4 est ensuite mis à jour
+    pour permettre également à R1 de gérer les ressources du
+    réseau. Une fois cette modification effectuée, tout administrateur
+    de l’organisation R1 ou R4 qui se connecte à O4 dispose des droits
+    de gestion du réseau, car c’est ce que la stratégie de la
+    configuration réseau NC4 autorise. En interne, chaque nœud du
+    service de commande enregistre chaque canal dans la configuration
+    du réseau, de sorte qu'il existe un enregistrement de chaque canal
+    créé au niveau du réseau.
+
+    Cela signifie que, bien que le noeud de service de commande O4
+    soit l'acteur qui a créé les consortiums X1 et X2 et les canaux C1
+    et C2, l'intelligence du réseau est contenue dans la configuration
+    de réseau NC4 à laquelle obéit O4. Tant que O4 se comportera comme
+    un bon acteur et mettrait en œuvre correctement les politiques
+    définies dans NC4 chaque fois qu'il traite de ressources réseau,
+    notre réseau se comportera comme toutes les organisations l'ont
+    convenu. À bien des égards, NC4 peut être considéré comme plus
+    important que O4 car, finalement, il contrôle l’accès au réseau.
+
+    Les mêmes principes s'appliquent aux configurations de canaux par
+    rapport aux pairs. Dans notre réseau, P1 et P2 sont également de
+    bons acteurs. Lorsque les nœuds homologues P1 et P2 interagissent
+    avec les applications clientes A1 ou A2, ils utilisent chacun les
+    politiques définies dans la configuration de canal CC1 pour
+    contrôler l'accès aux ressources du canal C1.
+
+    Par exemple, si A1 souhaite accéder au code de chaîne S5 du
+    contrat intelligent sur les nœuds homologues P1 ou P2, chaque nœud
+    homologue utilise sa copie de CC1 pour déterminer les opérations
+    pouvant être effectuées par A1. Par exemple, A1 peut être autorisé
+    à lire ou à écrire des données à partir du grand livre L1
+    conformément aux règles définies dans CC1. Nous verrons plus tard
+    le même schéma pour les acteurs de channel et sa configuration de
+    channel CC2. Là encore, nous pouvons constater que, si les
+    homologues et les applications sont des acteurs essentiels du
+    réseau, leur comportement dans un canal est davantage dicté par la
+    politique de configuration du canal que par tout autre facteur.
+
+    Enfin, il est utile de comprendre comment les configurations de
+    réseau et de canal sont physiquement réalisées. Nous pouvons voir
+    que les configurations de réseau et de canal sont logiquement
+    singulières - il y en a un pour le réseau et un pour chaque
+    canal. C'est important; chaque composant qui accède au réseau ou
+    au canal doit avoir une compréhension commune des autorisations
+    accordées à différentes organisations.
+
+    Même s'il existe logiquement une configuration unique, celle-ci
+    est en fait répliquée et maintenue cohérente par chaque nœud
+    formant le réseau ou le canal. Par exemple, dans notre réseau, les
+    nœuds homologues P1 et P2 ont tous deux une copie de la
+    configuration de canal CC1 et, au moment où le réseau est
+    complètement terminé, les nœuds homologues P2 et P3 auront tous
+    deux une copie de la configuration de canal CC2. De même, le noeud
+    de service de commande O4 a une copie de la configuration du
+    réseau, mais dans une [[https://hyperledger-fabric.readthedocs.io/en/release-1.4/network/network.html#the-ordering-service][configuration à plusieurs noeuds]], chaque
+    noeud de service de commande aura sa propre copie de la
+    configuration du réseau.
+
+    Les configurations de réseau et de canal restent cohérentes à
+    l'aide de la même technologie de chaîne de blocs que celle
+    utilisée pour les transactions utilisateur, mais pour les
+    transactions de configuration. Pour modifier une configuration de
+    réseau ou de canal, un administrateur doit soumettre une
+    transaction de configuration pour modifier la configuration du
+    réseau ou du canal. Il doit être signé par les organisations
+    identifiées dans la stratégie appropriée comme étant responsables
+    du changement de configuration. Cette politique s'appelle
+    mod_policy et nous en [[https://hyperledger-fabric.readthedocs.io/en/release-1.4/network/network.html#changing-policy][discuterons plus tard]].
+
+    En effet, les nœuds du service de commande exploitent une
+    mini-blockchain, connectée via le canal système mentionné
+    précédemment. Les nœuds de service de commande de canal système
+    distribuent les transactions de configuration réseau. Ces
+    transactions sont utilisées pour maintenir en coopération une
+    copie cohérente de la configuration du réseau sur chaque nœud de
+    service de commande. De la même manière, les nœuds homologues d'un
+    canal d'application peuvent distribuer des transactions de
+    configuration de canal. De même, ces transactions sont utilisées
+    pour conserver une copie cohérente de la configuration du canal
+    sur chaque nœud homologue.
+
+    Cet équilibre entre objets singuliers logiquement, en étant
+    distribués physiquement, est un motif courant dans Hyperledger
+    Fabric. Les objets tels que les configurations réseau, qui sont
+    logiquement uniques, s'avèrent être physiquement répliqués sur un
+    ensemble de nœuds de services de commande, par exemple. Nous le
+    voyons également dans les configurations de canal, les grands
+    livres et, dans une certaine mesure, les contrats intelligents
+    installés à plusieurs endroits mais dont les interfaces existent
+    logiquement au niveau du canal. C’est un motif qui se répète
+    maintes fois dans Hyperledger Fabric et permet à Hyperledger
+    Fabric d’être à la fois décentralisé et gérable en même temps.
+
+** Ajouter un autre noeud pair
+
+   Maintenant que l’organisation R3 peut pleinement participer au
+   canal C2, ajoutons ses composants d’infrastructure au canal. Plutôt
+   que de faire ce composant un à la fois, nous allons ajouter un
+   pair, sa copie locale d’un grand livre, un contrat intelligent et
+   une application client à la fois !
+
+   Voyons le réseau avec les composants de l’organisation R3 ajoutés :
+
+   [[./network.diagram.11.png]]
+
+   Le diagramme présente les faits relatifs aux canaux C1 et C2 du
+   réseau N comme suit: Les applications clientes A1 et A2 peuvent
+   utiliser le canal C1 pour la communication avec les homologues P1
+   et P2 et le service de commande O4; les applications clientes A3
+   peuvent utiliser le canal C2 pour la communication avec P3
+   homologue et le service de commande O4. Le service de commande O4
+   peut utiliser les services de communication des canaux C1 et C2. La
+   configuration du canal CC1 s’applique au canal C1, CC2 au canal C2.
+
+   Tout d'abord, notez que, du fait que le noeud pair P3 est connecté
+   au canal C2, il a un autre registre - L2 - que les noeuds pairs
+   utilisant le canal C1. Le grand livre L2 est effectivement limité
+   au canal C2. Le grand livre L1 est complètement séparé; il est
+   orienté vers le canal C1. Cela a du sens - le canal C2 a pour but
+   de fournir des communications privées entre les membres du
+   consortium X2 et le grand livre L2 est la banque privée pour leurs
+   transactions.
+
+   De la même manière, le contrat intelligent S6, installé sur le
+   noeud homologue P3 et instancié sur le canal C2, est utilisé pour
+   fournir un accès contrôlé au grand livre L2. L'application A3 peut
+   maintenant utiliser le canal C2 pour appeler les services fournis
+   par le contrat intelligent S6 afin de générer des transactions
+   pouvant être acceptées sur chaque copie du journal L2 du réseau.
+
+   À l'heure actuelle, nous avons un seul réseau qui comprend deux
+   canaux complètement distincts. Ces canaux fournissent des
+   installations gérées de manière indépendante permettant aux
+   organisations de traiter les unes avec les autres. Encore une fois,
+   c'est la décentralisation au travail; nous avons un équilibre entre
+   contrôle et autonomie. Cet objectif est atteint par le biais de
+   stratégies appliquées aux canaux contrôlés par différentes
+   organisations et affectant celles-ci.
+
+** Joindre un noeud pair à plusieurs canaux
+
+   Dans cette dernière étape du développement du réseau,
+   concentrons-nous sur l’organisation R2. Nous pouvons exploiter le
+   fait que R2 est membre des deux consortiums X1 et X2 en le joignant
+   à plusieurs canaux :
+
+   [[./network.diagram.12.png]]
+
+   Le diagramme montre les faits relatifs aux canaux C1 et C2 dans le
+   réseau N comme suit: les applications clientes A1 peuvent utiliser
+   le canal C1 pour la communication avec les homologues P1 et P2 et
+   le service de commande O4; l'application client A2 peut utiliser le
+   canal C1 pour la communication avec les homologues P1 et P2 et le
+   canal C2 pour la communication avec les homologues P2 et P3 et le
+   service de commande O4; l'application cliente A3 peut utiliser le
+   canal C2 pour la communication avec les homologues P3 et P2 et le
+   service de commande O4. Le service de commande O4 peut utiliser les
+   services de communication des canaux C1 et C2. La configuration du
+   canal CC1 s’applique au canal C1, CC2 au canal C2.
+
+   Nous pouvons voir que R2 est une organisation spéciale du réseau,
+   car c'est la seule organisation membre de deux canaux
+   d'application! Il est en mesure de traiter avec l'organisation R1
+   sur le canal C1, tout en pouvant également traiter avec
+   l'organisation R3 sur un autre canal, C2.
+
+   Notez comment le noeud intelligent P2 a le contrat intelligent S5
+   installé pour le canal C1 et le contrat intelligent S6 installé
+   pour le canal C2. Le noeud pair P2 est un membre à part entière des
+   deux canaux en même temps via différents contrats intelligents pour
+   différents ledgers.
+
+   C'est un concept très puissant - les canaux fournissent à la fois
+   un mécanisme de séparation des organisations et un mécanisme de
+   collaboration entre organisations. Pendant ce temps, cette
+   infrastructure est fournie et partagée par un ensemble
+   d’organisations indépendantes.
+
+   Il est également important de noter que le comportement du nœud
+   homologue P2 est contrôlé très différemment selon le canal sur
+   lequel il effectue les transactions. Plus précisément, les
+   stratégies contenues dans la configuration de canal CC1 dictent les
+   opérations disponibles pour P2 lorsqu’il effectue une transaction
+   dans le canal C1, alors que ce sont les politiques dans la
+   configuration de canal CC2 qui contrôlent le comportement de P2
+   dans le canal C2.
+
+   Encore une fois, cela est souhaitable - R2 et R1 ont convenu des
+   règles pour le canal C1, alors que R2 et R3 ont convenu des règles
+   pour le canal C2. Ces règles ont été capturées dans les stratégies
+   de canal respectives - elles peuvent et doivent être utilisées par
+   chaque composant d'un canal pour imposer le comportement correct,
+   comme convenu.
+
+   De même, nous pouvons voir que l'application cliente A2 est
+   maintenant capable de traiter sur les canaux C1 et C2. De même, il
+   sera également régi par les politiques des configurations de canaux
+   appropriées. De plus, notez que l'application cliente A2 et le nœud
+   homologue P2 utilisent un vocabulaire visuel mixte: lignes et
+   connexions. Vous pouvez voir qu'ils sont équivalents; ce sont des
+   synonymes visuels.
+
+*** Service de commande
+
+    Le lecteur observateur peut remarquer que le nœud du service de
+    commande semble être un composant centralisé; il a été utilisé
+    initialement pour créer le réseau et se connecte à tous les canaux
+    du réseau. Même si nous avons ajouté R1 et R4 à la stratégie de
+    configuration réseau NC4 qui contrôle le client, le nœud
+    s’exécutait sur l’infrastructure de R4. Dans un monde de
+    décentralisation, cela semble faux !
+
+    Ne vous inquiétez pas! Notre exemple de réseau a montré la
+    configuration de service de commande la plus simple pour vous
+    aider à comprendre l'idée d'un point d'administration réseau. En
+    fait, le service de commande peut lui aussi être complètement
+    décentralisé! Nous avons mentionné précédemment qu'un service de
+    commande pourrait être composé de nombreux nœuds individuels
+    appartenant à différentes organisations. Voyons donc comment cela
+    se ferait dans notre exemple de réseau.
+
+    Examinons une configuration plus réaliste du nœud du service de
+    commande :
+
+    [[./network.diagram.15.png]]
+
+    Un service de commande multi-organisations. Le service de commande
+    comprend les nœuds de service de commande O1 et O4. O1 est fourni
+    par l'organisation R1 et le noeud O4 par l'organisation R4. La
+    configuration réseau NC4 définit les autorisations de ressources
+    réseau pour les acteurs des deux organisations R1 et R4.
+
+    Nous pouvons voir que ce service de commande est complètement
+    décentralisé: il fonctionne dans l'organisation R1 et il
+    fonctionne dans l'organisation R4. La politique de configuration
+    du réseau, NC4, autorise les droits égaux pour R1 et R4 sur les
+    ressources du réseau. Les applications client et les nœuds
+    homologues des organisations R1 et R4 peuvent gérer les ressources
+    réseau en se connectant au nœud O1 ou au nœud O4, car les deux
+    nœuds se comportent de la même manière, comme défini par les
+    stratégies de la configuration réseau NC4. Dans la pratique, les
+    acteurs d’une organisation particulière ont tendance à utiliser
+    les infrastructures fournies par leur organisation d’origine, mais
+    ce n’est certainement pas toujours le cas.
+
+*** Distribution de transaction décentralisée
+
+    En plus d’être le point de gestion du réseau, le service de
+    commande fournit également une autre fonctionnalité essentielle:
+    c’est le point de distribution des transactions. Le service de
+    commande est le composant qui rassemble les transactions
+    approuvées à partir d'applications et les commande en blocs de
+    transaction, qui sont ensuite distribués à chaque nœud homologue
+    du canal. À chacun de ces homologues qui s'engagent, les
+    transactions sont enregistrées, qu'elles soient valides ou non, et
+    leur copie locale du grand livre est mise à jour de manière
+    appropriée.
+
+    Notez que le nœud de service de commande O4 joue un rôle très
+    différent pour le canal C1 et pour le réseau N. Lorsqu’il agit au
+    niveau du canal, le rôle de O4 est de rassembler les transactions
+    et de distribuer les blocs à l’intérieur du canal C1. Cela se fait
+    conformément aux politiques définies dans la configuration de
+    canal CC1. En revanche, lorsqu'il agit au niveau du réseau, le
+    rôle de O4 est de fournir un point de gestion pour les ressources
+    du réseau conformément aux règles définies dans la configuration
+    du réseau NC4. Notez à nouveau comment ces rôles sont définis par
+    différentes stratégies dans les configurations de canal et de
+    réseau, respectivement. Cela devrait vous renforcer l'importance
+    de la configuration déclarative basée sur des stratégies dans
+    Hyperledger Fabric. Les politiques définissent et permettent de
+    contrôler les comportements acceptés par chacun des membres d'un
+    consortium.
+
+    Nous pouvons voir que le service de commande, comme les autres
+    composants de Hyperledger Fabric, est un composant totalement
+    décentralisé. Qu'ils agissent en tant que point de gestion de
+    réseau ou en tant que distributeur de blocs dans un canal, ses
+    nœuds peuvent être répartis selon les besoins dans plusieurs
+    organisations d'un réseau.
+
+*** Modifier la règle
+
+    Tout au long de notre exploration du réseau exemple, nous avons
+    constaté l’importance des politiques pour contrôler le
+    comportement des acteurs du système. Nous n’avons abordé que
+    quelques-unes des stratégies disponibles, mais vous pouvez en
+    définir de nombreuses de manière déclarative pour contrôler chaque
+    aspect du comportement. Ces stratégies individuelles sont décrites
+    ailleurs dans la documentation.
+
+    Plus important encore, Hyperledger Fabric fournit une stratégie
+    extrêmement puissante qui permet aux administrateurs de réseaux et
+    de canaux de gérer eux-mêmes les changements de stratégie! La
+    philosophie sous-jacente est que le changement de politique est
+    une constante, qu'il se produise au sein d'une organisation ou
+    entre des organisations, ou qu'il soit imposé par des régulateurs
+    externes. Par exemple, de nouvelles organisations peuvent
+    rejoindre un canal ou les autorisations des organisations
+    existantes peuvent être augmentées ou diminuées. Voyons un peu
+    plus comment la politique de changement est implémentée dans
+    Hyperledger Fabric.
+
+    Le point clé de leur compréhension est que le changement de
+    politique est géré par une politique dans la politique
+    elle-même. La stratégie de modification, ou mod_policy, est une
+    stratégie de première classe au sein d'une configuration de réseau
+    ou de canal qui gère les changements. Donnons deux brefs exemples
+    de la manière dont nous avons déjà utilisé mod_policy pour gérer
+    les changements dans notre réseau !
+
+    Le premier exemple concerne la configuration initiale du réseau. À
+    cette époque, seule la société R4 était autorisée à gérer le
+    réseau. En pratique, cela a été réalisé en faisant de R4 la seule
+    organisation définie dans la configuration réseau NC4 avec des
+    autorisations sur les ressources réseau. De plus, la mod_policy
+    pour NC4 ne mentionnait que l'organisation R4 - seul R4 était
+    autorisé à modifier cette configuration.
+
+    Nous avons ensuite fait évoluer le réseau N pour permettre
+    également à l’organisation R1 d’administrer le réseau. Pour ce
+    faire, R4 a ajouté R1 aux stratégies de création de canal et de
+    consortium. En raison de ce changement, R1 a pu définir les
+    consortiums X1 et X2 et créer les canaux C1 et C2. R1 disposait
+    des mêmes droits administratifs sur les stratégies de canal et de
+    consortium dans la configuration du réseau.
+
+    Cependant, R4 pourrait accorder encore plus d’énergie à la
+    configuration réseau à la configuration réseau! R4 pourrait
+    ajouter R1 à la mod_policy de sorte que R1 puisse également gérer
+    les modifications de la stratégie réseau.
+
+    Cette deuxième puissance est beaucoup plus puissante que la
+    première, car maintenant, R1 a le plein contrôle de la
+    configuration du réseau NC4! Cela signifie que R1 peut, en
+    principe, supprimer les droits de gestion de R4 du réseau. En
+    pratique, R4 configurerait la mod_policy de telle sorte que R4
+    devrait également approuver la modification ou que toutes les
+    organisations de la mod_policy devaient approuver la
+    modification. Il ya beaucoup de flexibilité pour rendre la
+    mod_policy aussi sophistiquée que nécessaire pour prendre en
+    charge tout processus de changement requis.
+
+    Ceci est mod_policy au travail - il a permis l'évolution gracieuse
+    d'une configuration de base en une configuration
+    sophistiquée. Cela s'est toujours produit avec l'accord de toutes
+    les organisations impliquées. Le mod_policy se comporte comme
+    toute autre politique dans une configuration de réseau ou de
+    canal; il définit un ensemble d'organisations autorisées à
+    modifier le mod_policy lui-même.
+
+    Dans cette sous-section, nous n'avons fait qu'effleurer le pouvoir
+    des stratégies et de mod_policy. Il est discuté beaucoup plus
+    longuement dans le sujet politique, mais pour le moment, revenons
+    à notre réseau fini !
+
+** Réseau complètement formé
+
+   Récapitulons l’apparence de notre réseau en utilisant un
+   vocabulaire visuel cohérent. Nous l'avons légèrement réorganisé à
+   l'aide de notre syntaxe visuelle plus compacte, car elle convient
+   mieux aux topologies plus grandes :
+
+   [[./network.diagram.14.png]]
+
+   Dans ce diagramme, nous voyons que le réseau Fabric Blockchain se
+   compose de deux canaux d'application et d'un canal de commande. Les
+   organisations R1 et R4 sont responsables du canal de commande, R1
+   et R2 sont responsables du canal d'application bleu, tandis que R2
+   et R3 sont responsables du canal d'application rouge. Les
+   applications clientes A1 sont un élément de l'organisation R1 et
+   CA1 est son autorité de certification. Notez que l'entité P2
+   homologue de l'organisation R2 peut utiliser les fonctionnalités de
+   communication des canaux d'application bleu et rouge. Chaque canal
+   d'application a sa propre configuration de canal, en l'occurrence
+   CC1 et CC2. La configuration du canal du canal système fait partie
+   de la configuration du réseau, NC4.
+
+   Nous sommes à la fin de notre voyage conceptuel pour créer un
+   exemple de réseau de chaînes de blocs Hyperledger Fabric. Nous
+   avons créé un réseau de quatre organisations avec deux canaux et
+   trois nœuds homologues, avec deux contrats intelligents et un
+   service de commande. Il est pris en charge par quatre autorités de
+   certification. Il fournit des services de grand livre et de contrat
+   intelligent à trois applications clientes, qui peuvent interagir
+   avec elle via les deux canaux. Prenez un moment pour parcourir les
+   détails du réseau dans le diagramme et n'hésitez pas à relire le
+   sujet pour renforcer vos connaissances ou à passer à un sujet plus
+   détaillé.
+
+*** Résumé des composants du réseau
+
+    Voici un résumé rapide des composants réseau dont nous avons discuté:
+
+    + [[https://hyperledger-fabric.readthedocs.io/en/release-1.4/glossary.html#ledger][Registre]]. Un par canal. Composé de la [[https://hyperledger-fabric.readthedocs.io/en/release-1.4/glossary.html#block][Blockchain]] et de [[https://hyperledger-fabric.readthedocs.io/en/release-1.4/glossary.html#world-state][l'état mondial]]
+    + [[https://hyperledger-fabric.readthedocs.io/en/release-1.4/glossary.html#smart-contract][Smart contrat]] (aka chaincode)
+    + [[https://hyperledger-fabric.readthedocs.io/en/release-1.4/glossary.html#peer][Nœuds pairs]]
+    + [[https://hyperledger-fabric.readthedocs.io/en/release-1.4/glossary.html#ordering-service][Service de commande]]
+    + [[https://hyperledger-fabric.readthedocs.io/en/release-1.4/glossary.html#channel][Canal]]
+    + [[https://hyperledger-fabric.readthedocs.io/en/release-1.4/glossary.html#hyperledger-fabric-ca][Autorité de certification]]
+
+** Résumé du réseau
+
+   Dans cette rubrique, nous avons vu comment différentes
+   organisations partagent leur infrastructure afin de fournir un
+   réseau de chaînes de blocs Hyperledger Fabric intégré. Nous avons
+   vu comment l'infrastructure collective peut être organisée en
+   canaux fournissant des mécanismes de communication privés gérés de
+   manière indépendante. Nous avons vu comment des acteurs tels que
+   les applications client, les administrateurs, les pairs et les
+   commandeurs sont identifiés comme appartenant à différentes
+   organisations grâce à l'utilisation de certificats de leurs
+   autorités de certification respectives. Nous avons également
+   constaté l’importance de la stratégie pour définir les
+   autorisations accordées par ces acteurs de l’organisation sur les
+   ressources réseau et de canal.
+
+   
+
